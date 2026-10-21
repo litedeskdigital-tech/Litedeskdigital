@@ -1,7 +1,7 @@
 name: UEFA probe (temporary)
 
-# Manual-only. Prints compact summaries of UEFA match API responses so the fixture importer can be written
-# against real data. To be removed before the importer is merged.
+# Manual-only. Runs this branch's update end to end and prints what it imported. Commits nothing.
+# To be removed before the importer is merged.
 on:
   workflow_dispatch:
 
@@ -11,24 +11,37 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
-      - name: Probe
-        env:
-          UA: "Litedeskdigital-model/1.0 (+https://github.com/litedeskdigital-tech/Litedeskdigital)"
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run update -- --no-tune
+      - name: Show import
         run: |
           set +e
-          get() { curl -sS -m 30 -A "$UA" -H "Accept: application/json" "$1"; }
-          slim='walk(if type=="object" then del(.translations, .images, .bigLogoUrl, .logoUrl, .mediumLogoUrl, .associationLogoUrl) else . end) | del(.playerEvents, .referees, .stadium, .competition, .relatedMatches, .lineupStatus, .condition)'
-          M="https://match.uefa.com/v5/matches"
-          get "$M?competitionId=1&seasonYear=2027&limit=200&offset=0&order=ASC" > m.json
-          echo "count $(jq length m.json)"
-          echo "::group::last finished (2027)"; jq -c "[.[] | select(.status==\"FINISHED\")][-1] | $slim" m.json; echo "::endgroup::"
-          echo "::group::first not finished (2027)"; jq -c "[.[] | select(.status!=\"FINISHED\")][0] | $slim" m.json; echo "::endgroup::"
-          echo "::group::phase/round/status counts"; jq -c '[.[] | {phase: .round.phase, round: .round.metaData.name, status}] | group_by([.phase, .round, .status]) | map(.[0] + {n: length})' m.json; echo "::endgroup::"
-          for off in 200 400; do echo "offset $off: $(get "$M?competitionId=1&seasonYear=2027&limit=200&offset=$off&order=ASC" | jq length)"; done
-          get "$M?competitionId=1&seasonYear=2026&limit=200&offset=0&order=DESC" > k.json
-          echo "::group::2026 latest finished (knockouts, score shapes)"; jq -c "[.[] | select(.status==\"FINISHED\")] | .[0:3][] | $slim" k.json; echo "::endgroup::"
-          for c in 14 2019; do
-            echo "competition $c 2027: $(get "$M?competitionId=$c&seasonYear=2027&limit=200&offset=0&order=ASC" | jq -c 'if type=="array" then {n: length, finished: ([.[] | select(.status=="FINISHED")] | length)} else . end')"
-          done
+          echo "::group::uefa-import.json"; cat data/uefa-import.json; echo "::endgroup::"
+          echo "::group::matches by comp/season (played/total)"
+          node -e '
+            const d = JSON.parse(require("fs").readFileSync("data/matches.json","utf8"));
+            const c = {}; for (const m of d.matches) { const k = m.comp+" "+m.season+" "+m.source; c[k] = c[k] || [0,0]; c[k][1]++; if (m.ft) c[k][0]++; }
+            for (const k of Object.keys(c).sort()) console.log(k, c[k].join("/"));
+            const cl = d.matches.filter(m => m.comp==="cl" && m.season==="2026-27");
+            console.log("--- cl 2026-27 matchday 3");
+            for (const m of cl.filter(m => m.matchday===3)) console.log(m.date, m.home, "v", m.away, m.ft ? m.ft.home+"-"+m.ft.away : "open", m.source);
+            console.log("--- cl 2026-27 next fixtures"); for (const m of cl.filter(m => !m.ft).slice(0,12)) console.log(m.date, m.home, "v", m.away);
+          '
+          echo "::endgroup::"
+          echo "::group::frozen CL predictions still match a database row"
+          node -e '
+            const d = JSON.parse(require("fs").readFileSync("data/matches.json","utf8"));
+            const ids = new Set(d.matches.map(m => m.id));
+            const p = JSON.parse(require("fs").readFileSync("data/predictions.json","utf8")).predictions.filter(x => x.comp==="cl");
+            for (const x of p) console.log(ids.has(x.matchId) ? "ok " : "MISSING ", x.matchId, x.result ? "scored "+JSON.stringify(x.result) : "");
+          '
+          echo "::endgroup::"
+          echo "::group::report"; grep -E "^Sources|log loss|League offsets" -A0 REPORT.md | cut -c1-600; sed -n '/## League offsets/,/## Strongest/p' REPORT.md; sed -n '/## Strongest/,$p' REPORT.md | head -16; grep -E "^\| 2026-10-2[1-3] \| cl" REPORT.md; echo "::endgroup::"

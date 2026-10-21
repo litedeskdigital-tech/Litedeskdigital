@@ -176,6 +176,8 @@ export type CycleInput = {
   noTune?: boolean;
   /** Player sheet (data/players.csv); enables the anytime-scorer bonus pick. */
   players?: Player[];
+  /** Competitions whose fixtures are predicted and logged; others only feed the ratings. All when omitted. */
+  predictComps?: string[];
 };
 
 export type CycleOutput = {
@@ -287,6 +289,7 @@ export function runCycle(input: CycleInput): CycleOutput {
   const newPredictions: LoggedPrediction[] = [];
   for (const m of matches) {
     if (isPlayed(m) || m.date < today || m.date > horizon) continue;
+    if (input.predictComps && !input.predictComps.includes(m.comp)) continue;
     const firstLeg = m.leg === 2 ? matches.find((x) => x.leg === 1 && x.stage === m.stage && x.season === m.season && x.home === m.away && x.away === m.home)?.ft : undefined;
     if (m.leg === 2 && !firstLeg) continue;
     const pred = generatePrediction({ match: m, model, firstLeg, players: input.players, seed: 1 });
