@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: "17 4 * * *"
   workflow_dispatch:
+    inputs:
+      retune:
+        description: "Re-tune the model settings now (e.g. after adding data sources)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -30,7 +35,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      - run: npm run update
+      - run: npm run update -- ${{ inputs.retune && '--retune' || '' }}
       - name: Commit updated model
         run: |
           git config user.name "model-bot"

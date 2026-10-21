@@ -15,13 +15,18 @@ openfootball ──► data/matches.json ──► rating filter ──► model
                                 (adopted only if better)  (lasting slip, or every 60 days)
 ```
 
-1. **Data.** Every night the importers fetch every published openfootball file from 2023/24 to the current season:
-   - Champions League: `champions-league/<season>/cl.txt`;
-   - domestic leagues: `football.json/<season>/<league>.json` for England, Spain, Germany, Italy, France, Portugal and the Netherlands.
+1. **Data.** Every night the importers fetch:
+   - **openfootball league files** for 12 leagues: England, Spain, Germany, Italy, France, Portugal and the Netherlands from 2023/24, plus Austria (from 2023/24), Belgium, Turkey, Scotland and Greece (from 2024/25).
+     - Club names in those files are matched to the Champions League spelling ("Galatasaray" → "Galatasaray SK"). A name is never matched onto a Champions League club that already appears under its own name in the same league, so Paris FC stays separate from PSG.
+   - **openfootball Champions League files** (2023/24 to 2025/26).
+   - **UEFA's match API** (`match.uefa.com`):
+     - **Champions League main tournament:** fixtures and results, for any season openfootball hasn't published. This season's league phase is predicted and frozen automatically before kick-off, with nothing entered by hand.
+     - **Champions League qualifiers, Europa League and Conference League:** played results for every season. These cross-border games tie clubs from leagues without open data (Norway, Ukraine, Denmark, …) to the rest.
+     - **Club matching:** UEFA clubs are matched to database clubs by country and name, with `UEFA_NAME_ALIASES` in `src/data/names.ts` for spellings that need help ("Nott'm Forest").
+     - **New and skipped clubs:** a club from a country without league data is added the first time it appears. An unmatched club from a covered league is skipped, never split into two, and listed in `data/uefa-import.json`.
+     - **Requests:** finished past seasons aren't fetched again.
 
-   New seasons are picked up automatically. Stored matches are never dropped, so the database only grows.
-
-   The 2026/27 Champions League isn't on openfootball yet, so `data/manual/cl-2026-27.txt` holds hand-entered **provisional** results in the same format. It's ignored automatically once openfootball publishes that season.
+   Stored matches are never dropped, so the database only grows. `data/manual/cl-<season>.txt` can still hold hand-entered rows; they're ignored once an open source carries that season.
 2. **Ratings: a dynamic hierarchical Bayesian model.**
    - Each club has an attack and a defence belief: a mean and a variance.
    - Each country has a league offset, shared by all its clubs in cross-border games. Domestic games teach relative strength within a league; Champions League games move whole leagues.
@@ -63,10 +68,12 @@ npm run typecheck
 npm test
 npm run update                                 # fetch, learn, score, maybe re-tune, predict, write REPORT.md
 npm run update -- --today 2026-10-21 --no-tune # replay a date; results after it are ignored
-npm run update -- --offline DIR                # read saved openfootball files instead of fetching
+npm run update -- --offline DIR                # read saved openfootball files instead of fetching (skips UEFA)
+npm run update -- --retune                     # re-tune the settings now, e.g. after adding data sources
+npm run update -- --no-uefa                    # skip both UEFA importers
 ```
 
-`.github/workflows/nightly.yml` runs the update at 04:17 UTC every day and commits `data/`, `model/` and `REPORT.md` straight to `main`. It can also be started by hand from the Actions tab.
+`.github/workflows/nightly.yml` runs the update at 04:17 UTC every day and commits `data/`, `model/` and `REPORT.md` straight to `main`. It can also be started by hand from the Actions tab, with an option to re-tune.
 
 ## Using the model in code
 

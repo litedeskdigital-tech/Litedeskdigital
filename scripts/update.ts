@@ -1,20 +1,22 @@
 /**
  * Nightly update: fetch open data, learn, score, maybe re-tune, predict ahead, write state and report.
  *
- *   tsx scripts/update.ts [--today YYYY-MM-DD] [--offline DIR] [--no-tune]
+ *   tsx scripts/update.ts [--today YYYY-MM-DD] [--offline DIR] [--no-tune] [--retune] [--no-uefa]
  *
  * --offline reads files previously saved as DIR/cl-<season>.txt and DIR/<comp>-<season>.json instead of fetching.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { hydrateTeams, mergeMatches, parseManualCl, type Db } from "../src/data/db";
+import { DOMESTIC_LEAGUES, type Match } from "../src/data/types";
+import { fetchUefaMatches, toMatches, UEFA_COMPETITIONS, type MatchImportReport } from "../src/data/uefaMatches";
 import { clUrl, fetchOpenfootball, httpFetcher, leagueUrl, seasonsUpTo, type Fetcher } from "../src/data/openfootball";
 import { backtest, runCycle, type LearningEvent, type LoggedPrediction } from "../src/learn";
 import { DEFAULT_PARAMS, type Params } from "../src/ratings";
 import { renderReport } from "../src/report";
 import { parsePlayersCsv } from "../src/scorers";
 import { buildPlayerSheet, fetchUefaSeason, mapTeams, playersToCsv, uefaFetcher, uefaSeasonYear, type SheetReport } from "../src/data/uefa";
-import { allTeams } from "../src/teams";
+import { allTeams, getTeam } from "../src/teams";
 
 const ROOT = join(import.meta.dirname, "..");
 const P = {
@@ -28,6 +30,7 @@ const P = {
   players: join(ROOT, "data/players.csv"),
   uefaTeams: join(ROOT, "data/uefa-teams.json"),
   uefaAliases: join(ROOT, "data/manual/uefa-team-aliases.json"),
+  uefaImport: join(ROOT, "data/uefa-import.json"),
 };
 
 function arg(name: string): string | undefined {
@@ -55,7 +58,7 @@ function offlineFetcher(dir: string): Fetcher {
   const names = new Map<string, string>();
   for (const season of seasonsUpTo("2100-01-01")) {
     names.set(clUrl(season), `cl-${season}.txt`);
-    for (const comp of ["en.1", "es.1", "de.1", "it.1", "fr.1", "pt.1", "nl.1"]) names.set(leagueUrl(season, comp), `${comp}-${season}.json`);
+    for (const comp of DOMESTIC_LEAGUES) names.set(leagueUrl(season, comp), `${comp}-${season}.json`);
   }
   return async (url) => {
     const file = names.get(url);
@@ -72,12 +75,29 @@ async function main(): Promise<void> {
   // Previously stored matches are kept, so a source that disappears or fails never erases history.
   const stored = readJson<Db>(P.db, { updatedAt: "", matches: [], teams: {} });
   hydrateTeams(stored);
-  const fetched = await fetchOpenfootball(today, fetcher);
   const manual = seasonsUpTo(today).flatMap((season) => {
     const path = join(P.manual, `cl-${season}.txt`);
     return existsSync(path) ? parseManualCl(readFileSync(path, "utf8"), season) : [];
   });
-  const matches = mergeMatches(stored.matches.filter((m) => !m.provisional), manual, fetched.matches);
+  const manualClubs = [...new Set(manual.flatMap((m) => [m.home, m.away]))].map((id) => getTeam(id));
+  const fetched = await fetchOpenfootball(today, fetcher, manualClubs);
+  // UEFA fixtures and results: a failed fetch keeps whatever was stored before.
+  let uefaMatches: Match[] = [];
+  let uefaMatchNote = "";
+  if (!offline && !process.argv.includes("--no-uefa")) {
+    try {
+      const clClubs = new Set(
+        [...stored.matches, ...manual, ...fetched.matches].filter((m) => m.comp === "cl").flatMap((m) => [m.home, m.away]),
+      );
+      const res = await importUefaMatches(today, stored.matches, new Set(fetched.report.loaded), clClubs);
+      uefaMatches = res.matches;
+      uefaMatchNote = res.note;
+    } catch (err) {
+      uefaMatchNote = `UEFA match import failed, kept stored matches: ${String(err)}`;
+      console.warn(uefaMatchNote);
+    }
+  }
+  const matches = mergeMatches(stored.matches.filter((m) => !m.provisional), manual, fetched.matches, uefaMatches);
   const teams = Object.fromEntries(allTeams().map((t) => [t.id, { name: t.name, country: t.country }]));
   const countries = Object.fromEntries(allTeams().map((t) => [t.id, t.country]));
 
@@ -101,7 +121,10 @@ async function main(): Promise<void> {
     events: readJson<LearningEvent[]>(P.events, []),
     today,
     noTune: process.argv.includes("--no-tune"),
+    forceTune: process.argv.includes("--retune"),
     players,
+    // UEFA's other competitions and CL qualifiers only feed the ratings.
+    predictComps: ["cl", ...DOMESTIC_LEAGUES],
   });
 
   writeRows(P.db, { updatedAt: today, teams }, "matches", matches);
@@ -112,6 +135,7 @@ async function main(): Promise<void> {
   const sources = [
     ...fetched.report.loaded.map((s) => `openfootball ${s}`),
     ...(manual.length ? [`${manual.length} provisional hand-entered CL rows`] : []),
+    ...(uefaMatchNote ? [uefaMatchNote] : []),
     ...(uefaNote ? [uefaNote] : []),
   ];
   writeFileSync(P.report, renderReport(out, today, backtest(matches, countries, out.params), out.params, sources));
@@ -120,6 +144,50 @@ async function main(): Promise<void> {
   console.log(
     `${today}: ${matches.length} matches (${played} played) · scored ${out.newlyScored.length} · new predictions ${out.newPredictions.length} · params v${out.params.version} · missing: ${fetched.report.missing.join(", ") || "none"}`,
   );
+}
+
+/**
+ * Imports UEFA club-competition matches. The Champions League main tournament is taken (fixtures included) for
+ * seasons openfootball has not published; CL qualifiers, Europa League and Conference League are taken as played
+ * results for every season. Finished past seasons already in the database are not fetched again.
+ */
+async function importUefaMatches(
+  today: string,
+  stored: Match[],
+  openfootballLoaded: Set<string>,
+  clClubs: Set<string>,
+): Promise<{ matches: Match[]; note: string }> {
+  const seasons = seasonsUpTo(today);
+  const current = seasons.at(-1)!;
+  const have = new Set(stored.filter((m) => m.source === "uefa").map((m) => `${m.comp}/${m.season}`));
+  const aliases = readJson<Record<string, string>>(P.uefaAliases, {});
+  const matches: Match[] = [];
+  const total: MatchImportReport = { imported: 0, newClubs: [], skipped: [] };
+  for (const season of seasons) {
+    for (const c of UEFA_COMPETITIONS) {
+      const wantTournament = c.comp !== "cl" || !openfootballLoaded.has(`cl ${season}`);
+      const done = season !== current && have.has(`${c.qualifyingComp}/${season}`) && (!wantTournament || have.has(`${c.comp}/${season}`));
+      if (done) continue;
+      const rows = await fetchUefaMatches(c.id, uefaSeasonYear(season), uefaFetcher);
+      const keep = c.comp === "cl" && !wantTournament ? rows.filter((r) => r.round?.phase === "QUALIFYING") : rows;
+      // Only the Champions League main tournament contributes fixtures to predict; everything else, results only.
+      const tournament = keep.filter((r) => c.comp === "cl" && r.round?.phase !== "QUALIFYING");
+      const rest = keep.filter((r) => !(c.comp === "cl" && r.round?.phase !== "QUALIFYING"));
+      for (const [part, playedOnly] of [[tournament, false], [rest, true]] as const) {
+        const { matches: ms, report } = toMatches(part, c, season, aliases, playedOnly, clClubs);
+        matches.push(...ms);
+        total.imported += report.imported;
+        total.newClubs.push(...report.newClubs);
+        total.skipped.push(...report.skipped);
+      }
+    }
+  }
+  const skipped = [...new Map(total.skipped.map((s) => [`${s.name}|${s.country}`, s])).values()];
+  writeJson(P.uefaImport, { updatedAt: today, imported: total.imported, newClubs: [...new Set(total.newClubs)], skipped });
+  return {
+    matches,
+    note: `UEFA matches: ${total.imported} rows${total.newClubs.length ? `, ${new Set(total.newClubs).size} new clubs` : ""}${skipped.length ? `, ${skipped.length} clubs skipped (see data/uefa-import.json)` : ""}`,
+  };
 }
 
 /** Fetches this and last season's UEFA Champions League player stats and writes data/players.csv. */

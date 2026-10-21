@@ -38,6 +38,12 @@ export const LEAGUE_COUNTRY: Record<string, string> = {
   "fr.1": "FRA",
   "pt.1": "POR",
   "nl.1": "NED",
+  // Leagues of regular Champions League clubs; openfootball has these from 2024-25 (Austria from 2023-24).
+  "at.1": "AUT",
+  "be.1": "BEL",
+  "tr.1": "TUR",
+  "sco.1": "SCO",
+  "gr.1": "GRE",
 };
 
 export const DOMESTIC_LEAGUES = Object.keys(LEAGUE_COUNTRY);

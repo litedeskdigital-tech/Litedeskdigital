@@ -1,4 +1,5 @@
 import { registerTeam, teamId, type Stage } from "../teams";
+import { bestMatch, type TeamRef } from "./names";
 import { DOMESTIC_LEAGUES, LEAGUE_COUNTRY, matchId, type Match, type Score } from "./types";
 
 /** openfootball publishes plain files on GitHub; these are the only sources the model reads. */
@@ -143,14 +144,51 @@ type LeagueJson = {
   }[];
 };
 
+/**
+ * League names openfootball spells differently from its Champions League files and that token matching cannot
+ * settle on its own. Keyed by the league-file name.
+ */
+export const NAME_ALIASES: Record<string, string> = {
+  "Olympiakos Piraeus": "PAE Olympiakos SFP",
+};
+
+/** `leagueNames`: every club name in the same league's files, so a club already present under its CL name is never a merge target. */
+export type NameResolver = (name: string, country: string, leagueNames?: Set<string>) => string;
+
+/**
+ * Resolves league-file club names to the name used in the Champions League files, so a club is one club across
+ * sources: an exact name first, then NAME_ALIASES, then a unique token match among same-country CL clubs that
+ * do not already appear under their own name in that league ("Paris FC" must not become Paris Saint-Germain).
+ */
+export function clNameResolver(clClubs: { name: string; country: string }[]): NameResolver {
+  const unique = new Map(clClubs.map((c) => [c.name, c]));
+  const byName = new Set(unique.keys());
+  const refs: TeamRef[] = [...unique.values()].map((c) => ({ id: c.name, name: c.name, country: c.country, inCl: true }));
+  return (name, country, leagueNames) => {
+    if (byName.has(name)) return name;
+    const alias = NAME_ALIASES[name];
+    if (alias) return alias;
+    const pool = leagueNames ? refs.filter((r) => !leagueNames.has(r.name)) : refs;
+    return bestMatch(name, country, pool) ?? name;
+  };
+}
+
 /** Parses an openfootball football.json league file. */
-export function parseLeagueJson(json: LeagueJson, comp: string, season: string): Match[] {
+export function parseLeagueJson(
+  json: LeagueJson,
+  comp: string,
+  season: string,
+  resolve: NameResolver = (name) => name,
+): Match[] {
   const country = LEAGUE_COUNTRY[comp] ?? "";
+  const leagueNames = new Set(json.matches.flatMap((m) => [m.team1, m.team2]));
   return json.matches.map((m) => {
-    registerTeam(m.team1, country);
-    registerTeam(m.team2, country);
-    const home = teamId(m.team1);
-    const away = teamId(m.team2);
+    const homeName = resolve(m.team1, country, leagueNames);
+    const awayName = resolve(m.team2, country, leagueNames);
+    registerTeam(homeName, country);
+    registerTeam(awayName, country);
+    const home = teamId(homeName);
+    const away = teamId(awayName);
     const raw = Array.isArray(m.score) ? m.score : m.score?.ft;
     return {
       id: matchId(comp, season, "league", home, away),
@@ -180,19 +218,39 @@ export const httpFetcher: Fetcher = async (url) => {
 export type FetchReport = { loaded: string[]; missing: string[] };
 
 /** Every Champions League and covered domestic-league file from FIRST_SEASON to today's season. */
-export async function fetchOpenfootball(today: string, fetcher: Fetcher = httpFetcher): Promise<{ matches: Match[]; report: FetchReport }> {
+export async function fetchOpenfootball(
+  today: string,
+  fetcher: Fetcher = httpFetcher,
+  /** Clubs known from other Champions League sources (hand-entered or UEFA), resolved to like the CL files. */
+  extraClClubs: { name: string; country: string }[] = [],
+): Promise<{ matches: Match[]; report: FetchReport }> {
   const matches: Match[] = [];
   const report: FetchReport = { loaded: [], missing: [] };
-  for (const season of seasonsUpTo(today)) {
+  const seasons = seasonsUpTo(today);
+  // Champions League files first: their club names are the canonical ones the league files are resolved to.
+  const clClubs = new Map<string, { name: string; country: string }>();
+  for (const season of seasons) {
     const cl = await fetcher(clUrl(season));
-    if (cl) {
-      matches.push(...parseClText(cl, season));
-      report.loaded.push(`cl ${season}`);
-    } else report.missing.push(`cl ${season}`);
+    if (!cl) {
+      report.missing.push(`cl ${season}`);
+      continue;
+    }
+    for (const m of parseClText(cl, season)) matches.push(m);
+    for (const line of cl.split(/\r?\n/)) {
+      const mm = MATCH_LINE.exec(line);
+      if (!mm) continue;
+      clClubs.set(mm[1]!, { name: mm[1]!, country: mm[2]! });
+      clClubs.set(mm[3]!, { name: mm[3]!, country: mm[4]! });
+    }
+    report.loaded.push(`cl ${season}`);
+  }
+  for (const extra of extraClClubs) clClubs.set(extra.name, extra);
+  const resolve = clNameResolver([...clClubs.values()]);
+  for (const season of seasons) {
     for (const comp of DOMESTIC_LEAGUES) {
       const text = await fetcher(leagueUrl(season, comp));
       if (text) {
-        matches.push(...parseLeagueJson(JSON.parse(text) as LeagueJson, comp, season));
+        matches.push(...parseLeagueJson(JSON.parse(text) as LeagueJson, comp, season, resolve));
         report.loaded.push(`${comp} ${season}`);
       } else report.missing.push(`${comp} ${season}`);
     }

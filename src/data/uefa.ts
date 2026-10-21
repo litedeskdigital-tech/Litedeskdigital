@@ -1,4 +1,5 @@
 import type { Player, Position } from "../scorers";
+import { bestMatch, UEFA_NAME_ALIASES, type TeamRef } from "./names";
 import type { Fetcher } from "./openfootball";
 
 /**
@@ -95,39 +96,10 @@ export const uefaFetcher: Fetcher = async (url) => {
 
 // ---------- Matching UEFA clubs to the match database ----------
 
-const NOISE = new Set(["fc", "cf", "afc", "sc", "sk", "fk", "ac", "as", "ssc", "rc", "cd", "rcd", "ud", "sd", "kv", "vfb", "vfl", "tsg", "sv", "bv", "osc", "pae", "sl", "nk", "gnk", "bsc", "club", "de", "del", "of", "the", "and", "1"]);
-
-/** UEFA abbreviations that are not prefixes of the full word. */
-const SYNONYMS: Record<string, string> = { utd: "united" };
-
-function tokens(name: string): string[] {
-  return name
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .split(" ")
-    .filter((t) => t && !NOISE.has(t))
-    .map((t) => SYNONYMS[t] ?? t);
-}
-
-/** A UEFA token matches one of ours if it equals it, is a prefix of it ("b" → "borussia", "man" → "manchester"), or abbreviates a run of ours ("cp" → "clube portugal"). */
-function tokenMatches(t: string, ours: string[]): boolean {
-  if (ours.some((o) => o === t || o.startsWith(t))) return true;
-  if (t.length >= 2) {
-    for (let i = 0; i + t.length <= ours.length; i += 1) {
-      if (ours.slice(i, i + t.length).map((o) => o[0]).join("") === t) return true;
-    }
-  }
-  return false;
-}
-
-/** `inCl`: the club has Champions League matches in the database, which settles e.g. "Paris" → PSG, not Paris FC. */
-export type TeamRef = { id: string; name: string; country: string; inCl: boolean };
+export type { TeamRef };
 
 /**
- * Maps each UEFA club to a club id in the match database: same country, every UEFA name token matched, clubs
- * with Champions League history preferred, and a single best candidate. Anything ambiguous or unmatched is left
+ * Maps each UEFA club to a club id in the match database (see bestMatch). Anything ambiguous or unmatched is left
  * unmapped rather than guessed; `aliases` (UEFA team id → our id) settles those by hand.
  */
 export function mapTeams(
@@ -138,29 +110,7 @@ export function mapTeams(
   const out = new Map<string, string | null>();
   for (const u of uefa) {
     if (out.has(u.uefaTeamId)) continue;
-    const alias = aliases[u.uefaTeamId];
-    if (alias) {
-      out.set(u.uefaTeamId, alias);
-      continue;
-    }
-    const ut = tokens(u.teamName);
-    const sameCountry = ours.filter((o) => o.country === u.country);
-    const withCl = sameCountry.filter((o) => o.inCl);
-    const pool = (list: TeamRef[]) =>
-      list
-      .map((o) => {
-        const ot = tokens(o.name);
-        const hit = ut.filter((t) => tokenMatches(t, ot)).length;
-        // Full coverage of the UEFA name is required; among those, prefer the shortest official name.
-        return { id: o.id, ok: ut.length > 0 && hit === ut.length, extra: ot.length - hit };
-      })
-      .filter((s) => s.ok)
-      .sort((a, b) => a.extra - b.extra);
-    const fromCl = pool(withCl);
-    const scored = fromCl.length ? fromCl : pool(sameCountry);
-    const best = scored[0];
-    const tie = scored[1] && scored[1].extra === best?.extra;
-    out.set(u.uefaTeamId, best && !tie ? best.id : null);
+    out.set(u.uefaTeamId, aliases[u.uefaTeamId] ?? UEFA_NAME_ALIASES[u.teamName] ?? bestMatch(u.teamName, u.country, ours));
   }
   return out;
 }

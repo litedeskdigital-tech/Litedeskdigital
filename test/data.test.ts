@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mergeMatches, parseManualCl } from "../src/data/db";
-import { parseClScore, parseClText, parseLeagueJson, seasonsUpTo } from "../src/data/openfootball";
+import { clNameResolver, parseClScore, parseClText, parseLeagueJson, seasonsUpTo } from "../src/data/openfootball";
 
 const CL = `= UEFA Champions League 2025/26
 
@@ -73,5 +73,33 @@ describe("mergeMatches", () => {
 
     const unplayed = { ...official[0]!, ft: undefined };
     expect(mergeMatches([official[0]!], [unplayed])[0]!.ft).toEqual({ home: 0, away: 2 });
+  });
+});
+
+describe("league-name resolution", () => {
+  it("maps league-file spellings onto Champions League names", () => {
+    const resolve = clNameResolver([
+      { name: "Galatasaray SK", country: "TUR" },
+      { name: "SK Sturm Graz", country: "AUT" },
+      { name: "Royale Union Saint-Gilloise", country: "BEL" },
+      { name: "PAE Olympiakos SFP", country: "GRE" },
+      { name: "LASK", country: "AUT" },
+    ]);
+    expect(resolve("Galatasaray", "TUR")).toBe("Galatasaray SK");
+    expect(resolve("Sturm Graz", "AUT")).toBe("SK Sturm Graz");
+    expect(resolve("Union Saint-Gilloise", "BEL")).toBe("Royale Union Saint-Gilloise");
+    expect(resolve("Olympiakos Piraeus", "GRE")).toBe("PAE Olympiakos SFP");
+    expect(resolve("LASK", "AUT")).toBe("LASK");
+    // Clubs that never played in the Champions League keep their own name.
+    expect(resolve("SK Austria Klagenfurt", "AUT")).toBe("SK Austria Klagenfurt");
+    expect(resolve("FC Blau Weiß Linz", "AUT")).toBe("FC Blau Weiß Linz");
+  });
+});
+
+describe("league-name resolution safety", () => {
+  it("never merges a different club into a CL club already present in the same league", () => {
+    const resolve = clNameResolver([{ name: "Paris Saint-Germain FC", country: "FRA" }]);
+    const ligue1 = new Set(["Paris Saint-Germain FC", "Paris FC"]);
+    expect(resolve("Paris FC", "FRA", ligue1)).toBe("Paris FC");
   });
 });

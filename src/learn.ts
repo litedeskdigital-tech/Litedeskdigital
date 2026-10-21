@@ -174,8 +174,12 @@ export type CycleInput = {
   today: string;
   /** Skip tuning (tests, quick runs). */
   noTune?: boolean;
+  /** Re-tune now, e.g. after new data sources were added. A new set is still adopted only if it scores better. */
+  forceTune?: boolean;
   /** Player sheet (data/players.csv); enables the anytime-scorer bonus pick. */
   players?: Player[];
+  /** Competitions whose fixtures are predicted and logged; others only feed the ratings. All when omitted. */
+  predictComps?: string[];
 };
 
 export type CycleOutput = {
@@ -255,10 +259,12 @@ export function runCycle(input: CycleInput): CycleOutput {
   const lastTune = [...events].reverse().find((e) => e.kind === "tuned" || e.kind === "tune-rejected");
   const due = !lastTune || Date.parse(today) - Date.parse(lastTune.at) >= RETUNE_EVERY_DAYS * 86_400_000;
   const slipped = drift.z > DRIFT_Z;
-  if (!input.noTune && (due || slipped)) {
+  if (!input.noTune && (due || slipped || input.forceTune)) {
     const first = matches.find(isPlayed)?.date ?? today;
     const from = addDays(first, BURN_IN_DAYS);
-    const reason = slipped
+    const reason = input.forceTune
+      ? "re-tune requested (new data sources)"
+      : slipped
       ? `calibration slip: last ${drift.n} predictions log loss ${drift.actual.toFixed(3)} vs expected ${drift.expected.toFixed(3)} (z=${drift.z.toFixed(2)})`
       : `scheduled re-tune (every ${RETUNE_EVERY_DAYS} days)`;
     const res = tune(matches, countries, params, from);
@@ -287,6 +293,7 @@ export function runCycle(input: CycleInput): CycleOutput {
   const newPredictions: LoggedPrediction[] = [];
   for (const m of matches) {
     if (isPlayed(m) || m.date < today || m.date > horizon) continue;
+    if (input.predictComps && !input.predictComps.includes(m.comp)) continue;
     const firstLeg = m.leg === 2 ? matches.find((x) => x.leg === 1 && x.stage === m.stage && x.season === m.season && x.home === m.away && x.away === m.home)?.ft : undefined;
     if (m.leg === 2 && !firstLeg) continue;
     const pred = generatePrediction({ match: m, model, firstLeg, players: input.players, seed: 1 });
