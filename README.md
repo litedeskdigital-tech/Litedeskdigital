@@ -39,9 +39,16 @@ openfootball ──► data/matches.json ──► rating filter ──► model
    - **Ranges:** every win chance comes with a 90% credible interval.
    - **High-probability flag:** set only when the win chance is ≥ 60% and the low end of its range is ≥ 45%.
    - **Ties and finals:** knockout ties are priced over both legs, and finals at a neutral venue, including extra time and penalties.
-4. **Frozen log.** Each upcoming fixture is predicted once and written to `data/predictions.json` before kick-off. It's never rewritten, so the live record is honest.
-5. **Scoring and miss reviews.** When a result arrives, the frozen prediction is scored (log loss and hit). Each miss is classified as an upset, a coin flip, a missed draw or a wrongly called draw, and explained with how far the result moved both clubs' ratings.
-6. **Learning from every result, not just misses.** The ratings learn from all results through the filter. The tunable settings, listed in `model/params.json`, change only when the evidence says so:
+4. **Scenarios (5,000 simulations per match).** `src/simulate.ts` plays each match out minute by minute 5,000 times. Each run draws fresh ratings from the posterior; goals come later in matches (about 45/55 between halves), and a trailing side pushes a little harder. It reports:
+   - who scores first, and the win/draw/loss after each side scores first;
+   - the half-time/full-time outcomes and the chance of a goal in each 15-minute block;
+   - the chance of a late winner from level at 75';
+   - the favourite's bad scenarios: how often it trails, trails by two, drops a lead, or still wins after conceding first.
+
+   Win/draw/loss and the high-probability flag stay on the exact score-grid calculation, which is already equivalent to unlimited simulations; the simulated win/draw/loss agrees with it to within about 3 points.
+5. **Frozen log.** Each upcoming fixture is predicted once and written to `data/predictions.json` before kick-off. It's never rewritten, so the live record is honest.
+6. **Scoring and miss reviews.** When a result arrives, the frozen prediction is scored (log loss and hit). Each miss is classified as an upset, a coin flip, a missed draw or a wrongly called draw, and explained with how far the result moved both clubs' ratings.
+7. **Learning from every result, not just misses.** The ratings learn from all results through the filter. The tunable settings, listed in `model/params.json`, change only when the evidence says so:
    - **Triggers:** re-tuning runs when the last 200 scored predictions are worse than the model's own expected log loss by more than 2 standard errors, or every 60 days.
    - **Adoption:** a new parameter set is adopted only if it beats the current one walk-forward.
    - **Record:** every decision is written to `data/learning-log.json`.

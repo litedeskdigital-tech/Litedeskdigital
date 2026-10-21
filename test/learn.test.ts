@@ -79,5 +79,6 @@ describe("player sheet in the nightly cycle", () => {
     const out = runCycle({ matches: [...past, fixture], countries, params: DEFAULT_PARAMS, log: [], events: [], today: "2026-03-01", noTune: true, players });
     expect(out.log[0]!.bonusScorer).toMatchObject({ playerId: "s9", teamId: ids[0] });
     expect(out.upcoming[0]!.bonusScorer?.playerId).toBe("s9");
+    expect(out.log[0]!.scenario?.htft).toMatch(/^[HDA]\/[HDA]$/);
   });
 });

@@ -13,6 +13,7 @@ import {
   type WinnerPick,
 } from "./markets";
 import { compRates, viewMatch, type Params, type State } from "./ratings";
+import { simulateScenarios, type ScenarioReport } from "./simulate";
 import { anytimeScorers, type Player, type ScorerProb } from "./scorers";
 import { getTeam, type Stage, type Team } from "./teams";
 
@@ -75,6 +76,8 @@ export type Prediction = {
   pBtts: number;
   /** Chance the home side of this match goes through; only set for knockout ties. */
   pHomeAdvance?: number;
+  /** 5,000 minute-by-minute simulations: first goal, game flow, the favourite's bad scenarios. */
+  scenarios: ScenarioReport;
   /** Highest anytime-scorer chance across both sheets; absent when no player data was given. */
   bonusScorer?: ScorerProb;
   /** Top anytime scorers across both clubs, most likely first. */
@@ -134,6 +137,34 @@ function buildCommentary(
   return text;
 }
 
+function roundScenarios(r: ScenarioReport): ScenarioReport {
+  const t = (x: { home: number; draw: number; away: number }) => ({ home: round3(x.home), draw: round3(x.draw), away: round3(x.away) });
+  return {
+    ...r,
+    simulated: t(r.simulated),
+    firstGoal: { home: round3(r.firstGoal.home), away: round3(r.firstGoal.away), none: round3(r.firstGoal.none) },
+    ifHomeScoresFirst: t(r.ifHomeScoresFirst),
+    ifAwayScoresFirst: t(r.ifAwayScoresFirst),
+    htft: r.htft.map((x) => ({ key: x.key, p: round3(x.p) })),
+    goalInBlock: r.goalInBlock.map(round3),
+    lateWinner: round3(r.lateWinner),
+    favourite: {
+      ...r.favourite,
+      trailsAtSomePoint: round3(r.favourite.trailsAtSomePoint),
+      trailsByTwo: round3(r.favourite.trailsByTwo),
+      winsAfterTrailing: round3(r.favourite.winsAfterTrailing),
+      dropsLead: round3(r.favourite.dropsLead),
+      winsIfConcedesFirst: round3(r.favourite.winsIfConcedesFirst),
+    },
+  };
+}
+
+function scenarioSentence(fav: Team, r: ScenarioReport): string {
+  const pct = (p: number) => `${Math.round(p * 100)}%`;
+  const f = r.favourite;
+  return ` In ${r.simulations.toLocaleString("en-GB")} simulations ${fav.name} trail at some point ${pct(f.trailsAtSomePoint)} of the time and win ${pct(f.winsIfConcedesFirst)} of the games where they concede first; most likely half-time/full-time ${r.htft[0]!.key} (${pct(r.htft[0]!.p)}).`;
+}
+
 function formatTimestamp(date: Date): string {
   return date.toLocaleString("en-GB", {
     day: "numeric",
@@ -164,6 +195,7 @@ export function generatePrediction(input: PredictInput): Prediction {
   const ft = fullTime(sim.grid);
   const bands = marginBands(sim.grid, home.shortName, away.shortName);
   const winner = pickWinner(ft, bands, home.id, away.id, { home: sim.pHomeCi, away: sim.pAwayCi });
+  const scenarios = roundScenarios(simulateScenarios(view, winner.side, input.seed ?? 1));
   const likelyBand = [...bands].sort((x, y) => y.p - x.p)[0]!;
   const scores = topScores(sim.grid);
   const best = scores[0]!;
@@ -234,6 +266,7 @@ export function generatePrediction(input: PredictInput): Prediction {
     pOver25: round3(goals.pOver25),
     pBtts: round3(goals.pBtts),
     pHomeAdvance,
+    scenarios,
     bonusScorer: scorers[0],
     anytimeScorers: scorers,
     scorerNote,
@@ -242,7 +275,9 @@ export function generatePrediction(input: PredictInput): Prediction {
     paramsVersion: model.params.version,
     ratingsAsOf: model.state.asOf,
     timestamp: formatTimestamp(new Date()),
-    commentary: buildCommentary(home, away, ft, winner, likelyBand, pHomeAdvance, scorers[0], neutral),
+    commentary:
+      buildCommentary(home, away, ft, winner, likelyBand, pHomeAdvance, scorers[0], neutral) +
+      scenarioSentence(winner.side === "home" ? home : away, scenarios),
     formNote: FORM_NOTE,
     sourceNote: input.sourceNote ?? "",
     nSamples: N_SAMPLES,
