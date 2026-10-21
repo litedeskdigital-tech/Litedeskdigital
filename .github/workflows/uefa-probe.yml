@@ -1,0 +1,42 @@
+name: UEFA probe (temporary)
+
+# Manual-only. Prints compact summaries of UEFA match API responses so the fixture importer can be written
+# against real data. To be removed before the importer is merged.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe
+        env:
+          UA: "Litedeskdigital-model/1.0 (+https://github.com/litedeskdigital-tech/Litedeskdigital)"
+        run: |
+          get() { curl -sS -m 30 -A "$UA" -H "Accept: application/json" "$1"; }
+          M="https://match.uefa.com/v5/matches"
+          echo "::group::CL 2027 keys + one finished + one upcoming"
+          get "$M?competitionId=1&seasonYear=2027&limit=200&offset=0&order=ASC" > m.json
+          jq -c 'length' m.json
+          jq -c '.[0] | keys' m.json
+          jq -c '[.[] | select(.status=="FINISHED")][-1] | {id, status, kickOffTime, round: (.round | {id, phase, mode, metaData, stage: .stage?}), matchday: (.matchday | {id, longName, name, type?}), type, score, winner: (.winner? | tostring), home: (.homeTeam | {id, internationalName, countryCode}), away: (.awayTeam | {id, internationalName, countryCode}), leg?, playerEvents: null}' m.json
+          jq -c '[.[] | select(.status!="FINISHED")][0] | {id, status, kickOffTime, round: (.round | {phase, metaData}), matchday: (.matchday | {longName}), home: .homeTeam.internationalName, away: .awayTeam.internationalName}' m.json
+          jq -c '[.[] | {phase: .round.phase, round: .round.metaData.name, status}] | group_by(.phase, .round, .status) | map({phase: .[0].phase, round: .[0].round, status: .[0].status, n: length})' m.json
+          echo "::endgroup::"
+          echo "::group::paging"
+          for off in 200 400; do get "$M?competitionId=1&seasonYear=2027&limit=200&offset=$off&order=ASC" | jq -c 'length'; done
+          echo "::endgroup::"
+          echo "::group::knockout example from 2026 (score shapes)"
+          get "$M?competitionId=1&seasonYear=2026&limit=200&offset=0&order=DESC" > k.json
+          jq -c 'length' k.json
+          jq -c '[.[] | select(.status=="FINISHED")] | .[0:3][] | {round: .round.metaData.name, phase: .round.phase, kick: .kickOffTime.date, home: .homeTeam.internationalName, away: .awayTeam.internationalName, score, leg: .leg?}' k.json
+          echo "::endgroup::"
+          for c in 14 2019; do
+            echo "::group::competition $c season 2027"
+            get "$M?competitionId=$c&seasonYear=2027&limit=200&offset=0&order=ASC" | jq -c 'if type=="array" then {n: length, finished: ([.[] | select(.status=="FINISHED")] | length), name: .[0].competition.metaData.name} else . end'
+            echo "::endgroup::"
+          done
