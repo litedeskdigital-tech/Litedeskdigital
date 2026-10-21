@@ -1,0 +1,107 @@
+name: Android APK (EAS)
+
+# Builds the standalone Android APK of mobile/ on Expo EAS: links the project to the Expo account behind the
+# EXPO_TOKEN secret (once; the projectId is committed back), runs the Android export gate, builds the preview
+# profile (internal APK), waits for FINISHED, downloads the artifact, checks it is a real APK (ZIP magic "PK")
+# and attaches it to the run and to a GitHub release.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_NO_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Require EXPO_TOKEN
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::Add an Expo access token as the repository secret EXPO_TOKEN (expo.dev > Account settings > Access tokens)."
+            exit 1
+          fi
+      - run: npm ci
+      - name: Expo account
+        id: who
+        run: |
+          ACCOUNT=$(npx -y eas-cli@latest whoami --non-interactive | head -1 | tr -d '[:space:]')
+          echo "account=$ACCOUNT" >> "$GITHUB_OUTPUT"
+          echo "Expo account: $ACCOUNT"
+      - name: Link project (eas init) if needed
+        run: |
+          if node -e "process.exit(require('./app.json').expo?.extra?.eas?.projectId ? 0 : 1)"; then
+            echo "Already linked: $(node -p "require('./app.json').expo.extra.eas.projectId")"
+          else
+            npx -y eas-cli@latest init --account "${{ steps.who.outputs.account }}" --non-interactive --force
+            git config user.name "release-bot"
+            git config user.email "release-bot@users.noreply.github.com"
+            git add app.json
+            git commit -m "Link mobile app to Expo project $(node -p "require('./app.json').expo.extra.eas.projectId")"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+      - name: Export gate
+        run: npx expo export --platform android 2>&1 | tee export.log && grep -q "Android Bundled" export.log
+      - name: Build (preview APK)
+        id: build
+        run: |
+          rm -rf dist
+          npx -y eas-cli@latest build --platform android --profile preview --non-interactive --no-wait --json \
+            --message "UCL Match Model standalone APK" > build.json
+          cat build.json
+          BUILD_ID=$(node -p "const b=require('./build.json'); (Array.isArray(b)?b[0]:b).id")
+          echo "id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+      - name: Wait for FINISHED
+        id: wait
+        run: |
+          for i in $(seq 1 160); do
+            npx -y eas-cli@latest build:view ${{ steps.build.outputs.id }} --json > view.json 2>/dev/null || true
+            STATUS=$(node -p "try{require('./view.json').status}catch{''}")
+            echo "$(date -u +%T) status=$STATUS"
+            case "$STATUS" in
+              FINISHED) break ;;
+              ERRORED|CANCELED) cat view.json; exit 1 ;;
+            esac
+            sleep 30
+          done
+          [ "$STATUS" = "FINISHED" ] || { echo "::error::build did not finish in time"; exit 1; }
+          URL=$(node -p "const a=require('./view.json').artifacts; a.buildUrl || a.applicationArchiveUrl")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "APK artifact: $URL"
+          echo "Build page: https://expo.dev/accounts/${{ steps.who.outputs.account }}/projects/$(node -p "require('./app.json').expo.slug")/builds/${{ steps.build.outputs.id }}"
+      - name: Download and verify APK
+        run: |
+          curl -fsSL -o ucl-match-model.apk "${{ steps.wait.outputs.url }}"
+          ls -l ucl-match-model.apk
+          MAGIC=$(head -c 2 ucl-match-model.apk)
+          echo "first bytes: $MAGIC"
+          [ "$MAGIC" = "PK" ] || { echo "::error::downloaded file is not an APK"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ucl-match-model-apk
+          path: mobile/ucl-match-model.apk
+      - name: Attach to a GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="android-v$(node -p "require('./app.json').expo.version")-${{ github.run_number }}"
+          gh release create "$TAG" ucl-match-model.apk --target "${{ github.sha }}" --title "UCL Match Model Android ($TAG)" \
+            --notes "EAS build ${{ steps.build.outputs.id }}. Expo artifact: ${{ steps.wait.outputs.url }}"
