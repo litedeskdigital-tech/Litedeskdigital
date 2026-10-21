@@ -11,8 +11,12 @@ export type Match = {
   comp: Comp;
   /** "2025-26" style season label. */
   season: string;
-  /** ISO date (YYYY-MM-DD). */
+  /** ISO date (YYYY-MM-DD), local to the match. */
   date: string;
+  /** Kick-off as an ISO UTC timestamp, when the source gives one (UEFA does). */
+  kickoff?: string;
+  /** Local kick-off time ("20:45") from sources without a time zone (openfootball). */
+  localTime?: string;
   stage: Stage;
   matchday?: number;
   leg?: 1 | 2;

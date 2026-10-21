@@ -1,0 +1,47 @@
+name: Deploy app
+
+# Rebuilds the app from the committed model files when its code changes on main. The 6-hourly model update
+# publishes new data itself; its bot commits do not trigger this workflow.
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", "src/**", "scripts/app-data.ts", "package.json", "package-lock.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: model-update
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run app:data
+      - run: npm run app:build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

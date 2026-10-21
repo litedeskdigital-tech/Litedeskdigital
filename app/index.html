@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>UCL Match Model</title>
+    <meta name="description" content="Champions League and European league predictions: full-time odds, winner picks, margins, scorers and scenarios, refreshed every 6 hours." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%231d4ed8'/%3E%3Cpath d='M16 7l4 3-1.5 5h-5L12 10z' fill='%23fff'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"></span>
+        <div>
+          <h1>UCL Match Model</h1>
+          <p class="status" id="status">Loading…</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button role="tab" data-tab="fixtures" aria-selected="true">Next 48 hours</button>
+        <button role="tab" data-tab="results" aria-selected="false">Last 24 hours</button>
+        <button role="tab" data-tab="model" aria-selected="false">Model</button>
+      </nav>
+    </header>
+    <main>
+      <div class="filters" id="filters" aria-label="Competition filter"></div>
+      <section id="fixtures" role="tabpanel"></section>
+      <section id="results" role="tabpanel" hidden></section>
+      <section id="model" role="tabpanel" hidden></section>
+    </main>
+    <footer class="foot">
+      Probabilities are model estimates from open data (openfootball, UEFA). They are not betting advice; bookmaker
+      prices also reflect team news this model cannot see.
+    </footer>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

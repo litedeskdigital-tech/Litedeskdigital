@@ -27,7 +27,7 @@ export type UefaMatchRow = {
   status: string;
   homeTeam?: UefaTeam;
   awayTeam?: UefaTeam;
-  kickOffTime?: { date?: string };
+  kickOffTime?: { date?: string; dateTime?: string };
   round?: { phase?: string; metaData?: { name?: string; type?: string } };
   matchday?: { longName?: string; sequenceNumber?: string; type?: string };
   leg?: { number?: number };
@@ -137,6 +137,7 @@ export function toMatches(
       comp,
       season,
       date: row.kickOffTime.date,
+      kickoff: row.kickOffTime.dateTime,
       stage,
       matchday: stage === "league" ? Number(row.matchday?.sequenceNumber) || undefined : undefined,
       leg: row.leg?.number === 1 || row.leg?.number === 2 ? (row.leg.number as 1 | 2) : undefined,

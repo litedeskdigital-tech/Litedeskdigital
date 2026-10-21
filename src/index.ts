@@ -10,3 +10,5 @@ export * from "./predict";
 export * from "./tune";
 export * from "./learn";
 export * from "./report";
+export * from "./simulate";
+export * from "./appData";

@@ -1,11 +1,11 @@
-name: Nightly model update
+name: Model update (every 6 hours)
 
-# Pulls new results from openfootball, scores frozen predictions, updates ratings, re-tunes when the
-# prediction log shows a lasting slip (or every 60 days), predicts the next 10 days, and commits the
-# updated data, model state and REPORT.md straight to main.
+# Pulls new results (openfootball, UEFA), scores frozen predictions, updates ratings, refreshes the latest call
+# for every fixture before kick-off, re-tunes when the prediction log shows a lasting slip (or every 60 days),
+# commits data, model state and REPORT.md straight to main, then rebuilds and publishes the app to GitHub Pages.
 on:
   schedule:
-    - cron: "17 4 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
     inputs:
       retune:
@@ -15,9 +15,11 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
-  group: nightly-model-update
+  group: model-update
   cancel-in-progress: false
 
 jobs:
@@ -44,6 +46,21 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Nightly model update $(date -u +%F)"
+            git commit -m "Model update $(date -u +'%F %H:%M') UTC"
             git push origin HEAD:main
           fi
+      - run: npm run app:data
+      - run: npm run app:build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

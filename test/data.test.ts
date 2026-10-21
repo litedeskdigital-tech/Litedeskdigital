@@ -73,6 +73,11 @@ describe("mergeMatches", () => {
 
     const unplayed = { ...official[0]!, ft: undefined };
     expect(mergeMatches([official[0]!], [unplayed])[0]!.ft).toEqual({ home: 0, away: 2 });
+
+    // A stored fixture picks up a kick-off time and a new date from a later fetch.
+    const stored = { ...unplayed };
+    const fresh = { ...unplayed, date: "2025-09-18", kickoff: "2025-09-18T19:00:00Z" };
+    expect(mergeMatches([stored], [fresh])[0]).toMatchObject({ date: "2025-09-18", kickoff: "2025-09-18T19:00:00Z" });
   });
 });
 

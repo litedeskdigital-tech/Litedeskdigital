@@ -122,6 +122,7 @@ async function main(): Promise<void> {
     today,
     noTune: process.argv.includes("--no-tune"),
     forceTune: process.argv.includes("--retune"),
+    now: arg("--today") ? `${today}T00:00:00Z` : new Date().toISOString(),
     players,
     // UEFA's other competitions and CL qualifiers only feed the ratings.
     predictComps: ["cl", ...DOMESTIC_LEAGUES],
