@@ -1,7 +1,7 @@
 /**
  * Nightly update: fetch open data, learn, score, maybe re-tune, predict ahead, write state and report.
  *
- *   tsx scripts/update.ts [--today YYYY-MM-DD] [--offline DIR] [--no-tune]
+ *   tsx scripts/update.ts [--today YYYY-MM-DD] [--offline DIR] [--no-tune] [--retune] [--no-uefa]
  *
  * --offline reads files previously saved as DIR/cl-<season>.txt and DIR/<comp>-<season>.json instead of fetching.
  */
@@ -121,6 +121,7 @@ async function main(): Promise<void> {
     events: readJson<LearningEvent[]>(P.events, []),
     today,
     noTune: process.argv.includes("--no-tune"),
+    forceTune: process.argv.includes("--retune"),
     players,
     // UEFA's other competitions and CL qualifiers only feed the ratings.
     predictComps: ["cl", ...DOMESTIC_LEAGUES],

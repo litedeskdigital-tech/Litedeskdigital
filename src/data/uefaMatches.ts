@@ -1,5 +1,5 @@
 import { allTeams, registerTeam, type Stage } from "../teams";
-import { bestMatch, type TeamRef } from "./names";
+import { bestMatch, UEFA_NAME_ALIASES, type TeamRef } from "./names";
 import type { Fetcher } from "./openfootball";
 import { LEAGUE_COUNTRY, matchId, type Match, type Score } from "./types";
 
@@ -105,7 +105,7 @@ export function toMatches(
   const resolved = new Map<string, string | null>();
   const resolve = (t: UefaTeam): string | null => {
     if (resolved.has(t.id)) return resolved.get(t.id)!;
-    let id: string | null = aliases[t.id] ?? null;
+    let id: string | null = aliases[t.id] ?? UEFA_NAME_ALIASES[t.internationalName] ?? null;
     if (!id) {
       const refs: TeamRef[] = allTeams().map((x) => ({ id: x.id, name: x.name, country: x.country, inCl: clClubs.has(x.id) }));
       id = bestMatch(t.internationalName, t.countryCode, refs);

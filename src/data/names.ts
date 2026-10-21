@@ -56,3 +56,19 @@ export function bestMatch(name: string, country: string, candidates: TeamRef[]):
   if (!best || (scored[1] && scored[1].extra === best.extra)) return null;
   return best.id;
 }
+
+/**
+ * UEFA spellings that token matching cannot settle, mapped to the database club id. Found from the importer's
+ * skipped list (data/uefa-import.json); clubs outside the covered top flights (e.g. Torreense) stay skipped.
+ */
+export const UEFA_NAME_ALIASES: Record<string, string> = {
+  "AEK Athens": "aek-athen",
+  Olympiacos: "pae-olympiakos-sfp",
+  Rennes: "stade-rennais-fc-1901",
+  "Aris T.": "aris-saloniki",
+  "AZ Alkmaar": "az",
+  Hearts: "heart-of-midlothian",
+  "Nott'm Forest": "nottingham-forest-fc",
+  "N.E.C.": "nec",
+  "OFI Crete": "ofi-heraklion",
+};

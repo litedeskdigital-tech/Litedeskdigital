@@ -1,5 +1,5 @@
 import type { Player, Position } from "../scorers";
-import { bestMatch, type TeamRef } from "./names";
+import { bestMatch, UEFA_NAME_ALIASES, type TeamRef } from "./names";
 import type { Fetcher } from "./openfootball";
 
 /**
@@ -110,7 +110,7 @@ export function mapTeams(
   const out = new Map<string, string | null>();
   for (const u of uefa) {
     if (out.has(u.uefaTeamId)) continue;
-    out.set(u.uefaTeamId, aliases[u.uefaTeamId] ?? bestMatch(u.teamName, u.country, ours));
+    out.set(u.uefaTeamId, aliases[u.uefaTeamId] ?? UEFA_NAME_ALIASES[u.teamName] ?? bestMatch(u.teamName, u.country, ours));
   }
   return out;
 }

@@ -11,6 +11,7 @@ for (const [n, c] of [
   ["Paris Saint-Germain FC", "FRA"],
   ["Paris FC", "FRA"],
   ["Arsenal FC", "ENG"],
+  ["AEK Athen", "GRE"],
 ] as const) registerTeam(n, c);
 
 const team = (id: string, internationalName: string, countryCode: string) => ({ id, internationalName, countryCode });
@@ -76,6 +77,11 @@ describe("UEFA match importer", () => {
     const [m] = toMatches([FINAL], CL, "2025-26", {}, false, clClubs).matches;
     expect(m).toMatchObject({ stage: "final", neutral: true, home: "paris-saint-germain-fc", ft: { home: 1, away: 1 }, pens: { home: 4, away: 3 } });
     expect(stageOf({ ...FINAL, round: { metaData: { name: "Quarter-finals", type: "X" } } })).toBe("qf");
+  });
+
+  it("uses the alias table for spellings token matching cannot settle", () => {
+    const aek: UefaMatchRow = { ...UPCOMING, homeTeam: team("50129", "AEK Athens", "GRE") };
+    expect(toMatches([aek], CL, "2026-27", {}, false, clClubs).matches[0]!.home).toBe("aek-athen");
   });
 
   it("adds new clubs only from countries without league data, and drops unplayed rows when asked", () => {
