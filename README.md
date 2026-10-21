@@ -1,6 +1,6 @@
 # Champions League match model
 
-Predicts UEFA Champions League (men's) matches: the full-time result, a high-probability winning team, winning-margin bands and an anytime goalscorer bonus pick. It learns every night from open data: all Champions League results since 2023/24, plus seven domestic leagues.
+Predicts UEFA Champions League (men's) matches: the full-time result, a high-probability winning team, winning-margin bands, an anytime goalscorer bonus pick and minute-by-minute scenarios. It learns every 6 hours from open data (openfootball and UEFA) and publishes an app with the next 48 hours of fixtures and the last 24 hours of results.
 
 The latest numbers are in [REPORT.md](REPORT.md): the live record, the walk-forward backtest, calibration, recent misses, upcoming predictions and ratings.
 
@@ -67,6 +67,36 @@ Every night, `src/data/uefa.ts` reads UEFA's public Champions League player stat
 - **Limits:** only Champions League minutes and goals are counted (domestic form isn't), and injuries aren't known.
 - **Terms:** UEFA's terms restrict automated collection of its data; the repo owner has accepted that risk. Run `npm run update -- --no-uefa` to skip the import.
 
+## The app
+
+`app/` is a static site (Vite, no framework) published to GitHub Pages after every model update:
+
+- **Next 48 hours:** Champions League first, then the domestic leagues, with a competition filter. Each card shows:
+  - full-time odds and the winner pick, with its range and the ★ high-probability flag;
+  - the most likely margin and score, and the bonus scorer;
+  - how far the call has moved since the first frozen prediction.
+
+  The **Pre-match report** button opens the commentary, both clubs' ratings, the margin bands, the likeliest scores and the 5,000-simulation scenarios.
+- **Last 24 hours:** results, each with the frozen pre-match call and whether it was right. Misses come with the model's explanation.
+- **Model:** the live record, the latest-call record, calibration, the last tuning decision and league strengths.
+
+The page polls for new data every 10 minutes, and when it regains focus.
+
+**Refreshes and frozen calls.** The model refreshes every 6 hours (`.github/workflows/nightly.yml`, at 00:17, 06:17, 12:17 and 18:17 UTC):
+- The first prediction for a fixture stays frozen for the honest record.
+- Every refresh before kick-off also updates a "latest" call, and both calls are scored.
+- Kick-off times come from UEFA for Champions League games. Domestic fixtures have no time zone in the data, so their latest call stops at 10:00 UTC on match day.
+
+**Deployment.** `scripts/app-data.ts` builds `app/public/data/app.json` from the committed model files, and `.github/workflows/pages.yml` redeploys when the app code changes.
+
+One-time setup: in the repository settings, under **Pages**, set **Source** to **GitHub Actions**.
+
+```sh
+npm run app:data -- --now 2026-10-21T04:00:00Z   # data for the app at a given moment
+npm run app:dev                                  # local preview with live reload
+npm run app:build                                # production build in app/dist
+```
+
 ## Running
 
 ```sh
@@ -80,7 +110,7 @@ npm run update -- --retune                     # re-tune the settings now, e.g. 
 npm run update -- --no-uefa                    # skip both UEFA importers
 ```
 
-`.github/workflows/nightly.yml` runs the update at 04:17 UTC every day and commits `data/`, `model/` and `REPORT.md` straight to `main`. It can also be started by hand from the Actions tab, with an option to re-tune.
+`.github/workflows/nightly.yml` runs the update every 6 hours, commits `data/`, `model/` and `REPORT.md` straight to `main`, and publishes the app. It can also be started by hand from the Actions tab, with an option to re-tune.
 
 ## Using the model in code
 
@@ -114,8 +144,10 @@ Team ids are slugs of openfootball names (`teamId("Liverpool FC") === "liverpool
 | `src/scorers.ts` | Player sheets and anytime-scorer chances. |
 | `src/predict.ts` | Assembles one `Prediction`. |
 | `src/tune.ts` | Walk-forward scoring and coordinate-descent tuning. |
-| `src/learn.ts` | The nightly cycle: frozen log, scoring, miss reviews, drift check, re-tune, predict ahead. |
+| `src/learn.ts` | The update cycle: frozen first call and refreshed latest call, scoring, miss reviews, drift check, re-tune, predict ahead. |
 | `src/report.ts` | Writes REPORT.md. |
+| `src/simulate.ts` | 5,000 minute-by-minute simulations per match. |
+| `src/appData.ts`, `app/` | The app's data feed and the static front end. |
 
 ## Limits
 

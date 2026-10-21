@@ -24,9 +24,13 @@ function summary(scored: LoggedPrediction[]): string {
     const r = p.result!;
     return p.pick.side === "home" ? r.home > r.away : r.away > r.home;
   }).length;
+  const latest = scored.filter((p) => p.latest?.logLoss !== undefined);
   return [
     `- Scored predictions: ${n}; log loss ${f3(ll)} (1.099 = guessing); most-likely outcome right ${pct(hits / n)}`,
     `- High-probability picks: ${hp.length}, won ${hp.length ? pct(hpWins / hp.length) : "–"} (they average ${hp.length ? pct(hp.reduce((s, p) => s + p.pick.pWin, 0) / hp.length) : "–"} predicted)`,
+    ...(latest.length
+      ? [`- Latest refreshed call (last update before kick-off): log loss ${f3(latest.reduce((s, p) => s + p.latest!.logLoss!, 0) / latest.length)} over ${latest.length} games`]
+      : []),
   ].join("\n");
 }
 

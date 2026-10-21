@@ -5,14 +5,19 @@
   "type": "module",
   "description": "Champions League match model: dynamic hierarchical Dixon-Coles ratings that learn nightly from open data.",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p app/tsconfig.json",
     "test": "vitest run",
-    "update": "tsx scripts/update.ts"
+    "update": "tsx scripts/update.ts",
+    "app:data": "tsx scripts/app-data.ts",
+    "app:dev": "vite app",
+    "app:build": "vite build app",
+    "app:preview": "vite preview app"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "tsx": "^4.19.2",
+    "@types/node": "22.10.2",
+    "tsx": "4.19.2",
     "typescript": "5.6.3",
+    "vite": "5.4.11",
     "vitest": "2.1.9"
   },
   "engines": {

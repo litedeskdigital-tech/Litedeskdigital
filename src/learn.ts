@@ -48,12 +48,32 @@ export type LoggedPrediction = {
   };
   /** Anytime-scorer bonus pick, when a player sheet covered either club. */
   bonusScorer?: { playerId: string; name: string; teamId: string; pAnytime: number };
+  /** Kick-off (ISO UTC) when known, else the local time label. */
+  kickoff?: string;
+  localTime?: string;
+  /**
+   * The most recent refresh before kick-off. The first prediction above stays frozen for the honest record; this
+   * one shows how the call moved as new results and data arrived, and is scored too.
+   */
+  latest?: LatestCall;
   result?: { home: number; away: number };
   scoredAt?: string;
   logLoss?: number;
   /** The single most likely of home/draw/away matched the result. */
   hit?: boolean;
   miss?: MissReview;
+};
+
+export type LatestCall = {
+  at: string;
+  paramsVersion: number;
+  pHome: number;
+  pDraw: number;
+  pAway: number;
+  pick: { side: "home" | "away"; teamId: string; pWin: number; isHighProbability: boolean };
+  mostLikelyScore: string;
+  logLoss?: number;
+  hit?: boolean;
 };
 
 export type LearningEvent = {
@@ -126,6 +146,28 @@ export function toLogged(pred: Prediction, matchId: string, madeAt: string): Log
 
 type Delta = { attack: number; defence: number };
 
+function latestOf(pred: Prediction, at: string): LatestCall {
+  return {
+    at,
+    paramsVersion: pred.paramsVersion,
+    pHome: pred.fullTime.home,
+    pDraw: pred.fullTime.draw,
+    pAway: pred.fullTime.away,
+    pick: { side: pred.winner.side, teamId: pred.winner.teamId, pWin: pred.winner.pWin, isHighProbability: pred.winner.isHighProbability },
+    mostLikelyScore: pred.mostLikelyScore,
+  };
+}
+
+/** Last refresh hour (UTC) on match day that still counts as pre-match when a fixture has no kick-off time. */
+const NO_TIME_CUTOFF_HOUR = 10;
+
+/** Still before kick-off at `now`? Exact with a UEFA kick-off time; conservative (morning of match day) without. */
+export function beforeKickoff(m: Pick<Match, "date" | "kickoff">, now: string): boolean {
+  if (m.kickoff) return now < m.kickoff;
+  const today = now.slice(0, 10);
+  return m.date > today || (m.date === today && Number(now.slice(11, 13)) < NO_TIME_CUTOFF_HOUR);
+}
+
 /** Explains a miss from the logged odds and how the result moved both clubs' ratings. */
 export function reviewMiss(p: LoggedPrediction, result: { home: number; away: number }, deltas?: Record<string, Delta>): MissReview {
   const o = outcomeOf(result);
@@ -197,6 +239,8 @@ export type CycleInput = {
   players?: Player[];
   /** Competitions whose fixtures are predicted and logged; others only feed the ratings. All when omitted. */
   predictComps?: string[];
+  /** Current time (ISO UTC); decides which fixtures are still before kick-off. Defaults to the start of `today`. */
+  now?: string;
 };
 
 export type CycleOutput = {
@@ -259,8 +303,10 @@ export function runCycle(input: CycleInput): CycleOutput {
     const o = outcomeOf(m.ft);
     const probs = { home: p.pHome, draw: p.pDraw, away: p.pAway };
     const hit = argmax(probs) === o;
+    const lp = p.latest && { home: p.latest.pHome, draw: p.latest.pDraw, away: p.latest.pAway };
     const scored: LoggedPrediction = {
       ...p,
+      latest: p.latest && lp && { ...p.latest, logLoss: -Math.log(Math.max(1e-9, lp[o])), hit: argmax(lp) === o },
       result: m.ft,
       scoredAt: today,
       logLoss: -Math.log(Math.max(1e-9, probs[o])),
@@ -304,7 +350,8 @@ export function runCycle(input: CycleInput): CycleOutput {
 
   // 4. Predict and freeze every fixture in the horizon that is not logged yet.
   const model: Model = { state, params, countries };
-  const logged = new Set(log.map((p) => p.matchId));
+  const now = input.now ?? `${today}T00:00:00Z`;
+  const byMatch = new Map(log.map((p, i) => [p.matchId, i]));
   const horizon = addDays(today, HORIZON_DAYS);
   const upcoming: Prediction[] = [];
   const newPredictions: LoggedPrediction[] = [];
@@ -315,10 +362,15 @@ export function runCycle(input: CycleInput): CycleOutput {
     if (m.leg === 2 && !firstLeg) continue;
     const pred = generatePrediction({ match: m, model, firstLeg, players: input.players, seed: 1 });
     upcoming.push(pred);
-    if (!logged.has(m.id)) {
-      const entry = toLogged(pred, m.id, today);
+    const i = byMatch.get(m.id);
+    if (i === undefined) {
+      if (!beforeKickoff(m, now)) continue;
+      const entry: LoggedPrediction = { ...toLogged(pred, m.id, today), kickoff: m.kickoff, localTime: m.localTime, latest: latestOf(pred, now) };
+      byMatch.set(m.id, log.length);
       log.push(entry);
       newPredictions.push(entry);
+    } else if (beforeKickoff(m, now)) {
+      log[i] = { ...log[i]!, kickoff: m.kickoff ?? log[i]!.kickoff, localTime: m.localTime ?? log[i]!.localTime, latest: latestOf(pred, now) };
     }
   }
 

@@ -3,8 +3,9 @@ import { parseClText } from "./openfootball";
 import { byDate, type Match } from "./types";
 
 /**
- * Merges sources into one database. Open-source rows win over provisional hand-entered rows, a played row wins
- * over an unplayed one, and a provisional season is dropped once openfootball publishes that season.
+ * Merges sources into one database, later sources winning: open-source rows win over provisional hand-entered
+ * rows, a played row is never replaced by an unplayed one, and a provisional season is dropped once an open
+ * source publishes that season.
  */
 export function mergeMatches(...sources: Match[][]): Match[] {
   const official = new Set<string>();
@@ -20,8 +21,11 @@ export function mergeMatches(...sources: Match[][]): Match[] {
         out.set(m.id, m);
         continue;
       }
-      const better = (prev.provisional && !m.provisional) || (!prev.ft && m.ft) || (prev.ft && m.ft && !m.provisional);
-      if (better) out.set(m.id, m);
+      // A later source wins (new kick-off times, rescheduled dates, corrections) unless it would drop a result or
+      // put a provisional row over an official one.
+      const losesResult = !!prev.ft && !m.ft;
+      const downgrade = !!m.provisional && !prev.provisional;
+      if (!losesResult && !downgrade) out.set(m.id, m);
     }
   }
   return [...out.values()].sort(byDate);

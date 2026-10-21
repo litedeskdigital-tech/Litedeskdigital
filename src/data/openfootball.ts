@@ -39,7 +39,7 @@ const FINALS_STAGE: Record<string, Stage> = {
   Final: "final",
 };
 
-const MATCH_LINE = /^\s*(?:\d{1,2}:\d{2}\s+)?(.+?) \(([A-Z]{3})\)\s+v\s+(.+?) \(([A-Z]{3})\)\s*(.*)$/;
+const MATCH_LINE = /^\s*(?:(\d{1,2}:\d{2})\s+)?(.+?) \(([A-Z]{3})\)\s+v\s+(.+?) \(([A-Z]{3})\)\s*(.*)$/;
 const DATE_LINE = /^\s*(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Z][a-z]{2})\s+(\d{1,2})(?:\s+(\d{4}))?\s*$/;
 
 function pair(a: string, b: string): Score {
@@ -80,6 +80,7 @@ export function parseClText(text: string, season: string, source = "openfootball
   let year = startYear;
   let lastMonth = 7;
   let date = "";
+  let time: string | undefined;
   let stage: Stage = "league";
   let matchday: number | undefined;
   const out: Match[] = [];
@@ -107,11 +108,14 @@ export function parseClText(text: string, season: string, source = "openfootball
       else if (month < lastMonth) year += 1;
       lastMonth = month;
       date = `${year}-${String(month).padStart(2, "0")}-${d[2]!.padStart(2, "0")}`;
+      time = undefined;
       continue;
     }
     const mm = MATCH_LINE.exec(line);
     if (!mm || !date) continue;
-    const [, homeName, homeCountry, awayName, awayCountry, rest] = mm;
+    // A kick-off time applies to the lines under it until the next one.
+    const [, lineTime, homeName, homeCountry, awayName, awayCountry, rest] = mm;
+    if (lineTime) time = lineTime.padStart(5, "0");
     registerTeam(homeName!, homeCountry!);
     registerTeam(awayName!, awayCountry!);
     const home = teamId(homeName!);
@@ -126,6 +130,7 @@ export function parseClText(text: string, season: string, source = "openfootball
       home,
       away,
       neutral: stage === "final" ? true : undefined,
+      localTime: time,
       ...parseClScore(rest ?? ""),
       source,
     });
@@ -138,6 +143,7 @@ type LeagueJson = {
   matches: {
     round?: string;
     date: string;
+    time?: string;
     team1: string;
     team2: string;
     score?: { ft?: [number, number] } | [number, number];
@@ -200,6 +206,7 @@ export function parseLeagueJson(
       home,
       away,
       ft: raw ? { home: raw[0], away: raw[1] } : undefined,
+      localTime: m.time,
       source: "openfootball",
     };
   });
@@ -239,8 +246,8 @@ export async function fetchOpenfootball(
     for (const line of cl.split(/\r?\n/)) {
       const mm = MATCH_LINE.exec(line);
       if (!mm) continue;
-      clClubs.set(mm[1]!, { name: mm[1]!, country: mm[2]! });
-      clClubs.set(mm[3]!, { name: mm[3]!, country: mm[4]! });
+      clClubs.set(mm[2]!, { name: mm[2]!, country: mm[3]! });
+      clClubs.set(mm[4]!, { name: mm[4]!, country: mm[5]! });
     }
     report.loaded.push(`cl ${season}`);
   }
