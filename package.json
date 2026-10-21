@@ -3,13 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Champions League match model: Dixon-Coles goals on damped attack/defence ratings.",
+  "description": "Champions League match model: dynamic hierarchical Dixon-Coles ratings that learn nightly from open data.",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "update": "tsx scripts/update.ts"
   },
   "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
     "typescript": "5.6.3",
     "vitest": "2.1.9"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

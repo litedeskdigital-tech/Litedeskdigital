@@ -1,0 +1,13 @@
+{
+ "version": 2,
+ "driftPerDay": 0.00002,
+ "initVar": 0.16,
+ "rho": 0.04,
+ "newcomerOffset": 0.25,
+ "foreignPrior": -0.25,
+ "leagueVar": 0.1,
+ "leagueDriftPerDay": 0,
+ "goalCap": 6,
+ "compHalfLifeDays": 1460,
+ "tunedAt": "2026-10-21"
+}

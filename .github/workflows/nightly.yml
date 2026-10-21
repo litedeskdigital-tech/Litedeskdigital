@@ -1,0 +1,44 @@
+name: Nightly model update
+
+# Pulls new results from openfootball, scores frozen predictions, updates ratings, re-tunes when the
+# prediction log shows a lasting slip (or every 60 days), predicts the next 10 days, and commits the
+# updated data, model state and REPORT.md straight to main.
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly-model-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run update
+      - name: Commit updated model
+        run: |
+          git config user.name "model-bot"
+          git config user.email "model-bot@users.noreply.github.com"
+          git add data model REPORT.md
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Nightly model update $(date -u +%F)"
+            git push origin HEAD:main
+          fi

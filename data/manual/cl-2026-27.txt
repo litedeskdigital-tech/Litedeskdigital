@@ -1,0 +1,33 @@
+= UEFA Champions League 2026/27 (provisional, hand-entered)
+
+# Not yet published by openfootball. Scores were collected from uefa.com page snapshots that did not
+# fully agree, so treat them as provisional. Exact kick-off days within each matchday are not known;
+# dates below are placeholders inside the matchday window. This file is ignored automatically once
+# openfootball publishes champions-league/2026-27/cl.txt.
+
+▪ League, Matchday 1
+  Wed Sep 9 2026
+           Club Brugge KV (BEL)    v Aston Villa FC (ENG)     2-3
+           Borussia Dortmund (GER) v Villarreal CF (ESP)      3-2
+           FC Porto (POR)          v Manchester City FC (ENG)  0-2
+           Lille OSC (FRA)         v Real Betis Balompié (ESP)  2-3
+           Real Madrid CF (ESP)    v FC Internazionale Milano (ITA)  2-1
+           FC Barcelona (ESP)      v Feyenoord Rotterdam (NED)  5-1
+           VfB Stuttgart (GER)     v Viking FK (NOR)          3-1
+           Liverpool FC (ENG)      v Club Atlético de Madrid (ESP)  2-1
+           SSC Napoli (ITA)        v Arsenal FC (ENG)         0-1
+
+▪ League, Matchday 2
+  Wed Oct 14 2026
+           Racing Club de Lens (FRA) v Sporting Clube de Portugal (POR)  0-2
+           Sabah FK (AZE)          v SK Slavia Praha (CZE)    2-0
+           Arsenal FC (ENG)        v Lille OSC (FRA)          3-0
+           Club Atlético de Madrid (ESP) v Manchester United FC (ENG)  2-0
+           FC Internazionale Milano (ITA) v Club Brugge KV (BEL)  3-4
+           Galatasaray SK (TUR)    v FC Barcelona (ESP)       1-4
+           RB Leipzig (GER)        v PSV (NED)                1-0
+           Viking FK (NOR)         v FC Bayern München (GER)  3-3
+           Villarreal CF (ESP)     v SSC Napoli (ITA)         3-1
+           Feyenoord Rotterdam (NED) v Como 1907 (ITA)          3-2
+           LASK (AUT)              v Liverpool FC (ENG)       3-6
+           AS Roma (ITA)           v Real Madrid CF (ESP)     3-4
