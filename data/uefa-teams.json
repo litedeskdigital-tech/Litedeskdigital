@@ -11,6 +11,7 @@
   "50080": "fc-barcelona",
   "50107": "vfb-stuttgart",
   "50124": "club-atletico-de-madrid",
+  "50129": "aek-athen",
   "50136": "ssc-napoli",
   "50137": "as-roma",
   "50138": "fc-internazionale-milano",
@@ -22,6 +23,7 @@
   "52498": "sk-slavia-praha",
   "52682": "manchester-united-fc",
   "52683": "aston-villa-fc",
+  "52692": "fenerbahce",
   "52707": "fk-shakhtar-donetsk",
   "52747": "paris-saint-germain-fc",
   "52749": "feyenoord-rotterdam",
@@ -36,16 +38,5 @@
   "2603790": "rb-leipzig",
   "2609356": "sabah-fk"
  },
- "unmapped": [
-  {
-   "uefaTeamId": "50129",
-   "name": "AEK Athens",
-   "country": "GRE"
-  },
-  {
-   "uefaTeamId": "52692",
-   "name": "Fenerbahçe",
-   "country": "TUR"
-  }
- ]
+ "unmapped": []
 }
