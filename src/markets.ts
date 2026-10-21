@@ -16,15 +16,22 @@ export type WinnerPick = {
   pNotLose: number;
   /** Win chance with the draw voided: pWin / (pHome + pAway). */
   pDrawNoBet: number;
+  /** 5th–95th percentile of pWin across the rating posterior. */
+  pWinCi: [number, number];
   /** Most likely winning margin for the picked side, given that it wins. */
   likelyMargin: 1 | 2 | 3;
   confidence: Confidence;
-  /** pWin clears HIGH_PROBABILITY: the pick is a genuine favourite, not just the less unlikely side. */
+  /**
+   * pWin clears HIGH_PROBABILITY and even the low end of its interval clears HIGH_PROBABILITY_FLOOR: the pick is a
+   * genuine favourite the model is sure about, not a lean that only looks strong on a shaky rating.
+   */
   isHighProbability: boolean;
 };
 
 /** A favourite needs at least this 90-minute win chance to count as a high-probability pick. */
 export const HIGH_PROBABILITY = 0.6;
+/** ...and the 5th percentile of that chance must be at least this. */
+export const HIGH_PROBABILITY_FLOOR = 0.45;
 const MEDIUM_PROBABILITY = 0.45;
 
 export function fullTime(grid: number[][]): FullTime {
@@ -81,9 +88,16 @@ export function confidenceOf(pWin: number): Confidence {
 }
 
 /** Always names a team: the side more likely to win in 90 minutes, with how sure the model is. */
-export function pickWinner(ft: FullTime, bands: MarginBand[], homeId: string, awayId: string): WinnerPick {
+export function pickWinner(
+  ft: FullTime,
+  bands: MarginBand[],
+  homeId: string,
+  awayId: string,
+  ci: { home: [number, number]; away: [number, number] },
+): WinnerPick {
   const side = ft.home >= ft.away ? "home" : "away";
   const pWin = side === "home" ? ft.home : ft.away;
+  const pWinCi = side === "home" ? ci.home : ci.away;
   const byKey = new Map(bands.map((b) => [b.key, b.p]));
   const margins: [1 | 2 | 3, number][] = [
     [1, byKey.get(`${side}1`) ?? 0],
@@ -97,9 +111,10 @@ export function pickWinner(ft: FullTime, bands: MarginBand[], homeId: string, aw
     pWin,
     pNotLose: pWin + ft.draw,
     pDrawNoBet: pWin / (ft.home + ft.away),
+    pWinCi,
     likelyMargin: margins[0]![0],
     confidence: confidenceOf(pWin),
-    isHighProbability: pWin >= HIGH_PROBABILITY,
+    isHighProbability: pWin >= HIGH_PROBABILITY && pWinCi[0] >= HIGH_PROBABILITY_FLOOR,
   };
 }
 
