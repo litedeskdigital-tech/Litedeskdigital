@@ -1,0 +1,34 @@
+name: UEFA probe (temporary)
+
+# Manual-only. Fetches a few UEFA endpoints and prints the start of each response, so the player importer
+# can be written against real data. To be removed before the importer is merged.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe
+        env:
+          UA: "Litedeskdigital-model/1.0 (+https://github.com/litedeskdigital-tech/Litedeskdigital)"
+        run: |
+          probe() {
+            echo "::group::$1"
+            code=$(curl -sS -m 20 -A "$UA" -H "Accept: application/json" -o body.txt -w "%{http_code} %{content_type}" "$1" || echo "curl-failed")
+            echo "STATUS $code SIZE $(wc -c < body.txt 2>/dev/null || echo 0)"
+            head -c 2500 body.txt 2>/dev/null; echo
+            echo "::endgroup::"
+          }
+          for host in www.uefa.com compstats.uefa.com comp.uefa.com match.uefa.com; do probe "https://$host/robots.txt"; done
+          for y in 2026 2027; do
+            probe "https://compstats.uefa.com/v1/player-ranking?competitionId=1&seasonYear=$y&phase=TOURNAMENT&order=DESC&limit=5&offset=0&optionalFields=PLAYER%2CTEAM&stats=goals,minutes_played_official,matches_appearance,penalty_scored"
+          done
+          probe "https://compstats.uefa.com/v1/player-ranking?competitionId=1&seasonYear=2026&limit=5&offset=0&optionalFields=PLAYER%2CTEAM&stats=goals"
+          probe "https://comp.uefa.com/v2/stats/players?competitionId=1&seasonYear=2026&limit=5"
+          probe "https://match.uefa.com/v5/matches?competitionId=1&seasonYear=2027&limit=3&offset=0&order=ASC"
+          probe "https://comp.uefa.com/v2/teams?competitionId=1&seasonYear=2027&limit=3"
