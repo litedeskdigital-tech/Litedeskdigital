@@ -1,0 +1,51 @@
+{
+ "season": "2026-27",
+ "mapped": {
+  "7889": "liverpool-fc",
+  "50037": "fc-bayern-munchen",
+  "50043": "club-brugge-kv",
+  "50051": "real-madrid-cf",
+  "50062": "psv",
+  "50064": "fc-porto",
+  "50067": "galatasaray-sk",
+  "50080": "fc-barcelona",
+  "50107": "vfb-stuttgart",
+  "50124": "club-atletico-de-madrid",
+  "50136": "ssc-napoli",
+  "50137": "as-roma",
+  "50138": "fc-internazionale-milano",
+  "50149": "sporting-clube-de-portugal",
+  "52265": "real-betis-balompie",
+  "52277": "racing-club-de-lens",
+  "52280": "arsenal-fc",
+  "52319": "viking-fk",
+  "52498": "sk-slavia-praha",
+  "52682": "manchester-united-fc",
+  "52683": "aston-villa-fc",
+  "52707": "fk-shakhtar-donetsk",
+  "52747": "paris-saint-germain-fc",
+  "52749": "feyenoord-rotterdam",
+  "52758": "borussia-dortmund",
+  "52797": "sk-slovan-bratislava",
+  "52919": "manchester-city-fc",
+  "59333": "fk-bod-glimt",
+  "63405": "lask",
+  "70691": "villarreal-cf",
+  "75797": "lille-osc",
+  "79946": "como-1907",
+  "2603790": "rb-leipzig",
+  "2609356": "sabah-fk"
+ },
+ "unmapped": [
+  {
+   "uefaTeamId": "50129",
+   "name": "AEK Athens",
+   "country": "GRE"
+  },
+  {
+   "uefaTeamId": "52692",
+   "name": "Fenerbahçe",
+   "country": "TUR"
+  }
+ ]
+}
