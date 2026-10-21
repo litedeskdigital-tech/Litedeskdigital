@@ -13,6 +13,7 @@ import { backtest, runCycle, type LearningEvent, type LoggedPrediction } from ".
 import { DEFAULT_PARAMS, type Params } from "../src/ratings";
 import { renderReport } from "../src/report";
 import { parsePlayersCsv } from "../src/scorers";
+import { buildPlayerSheet, fetchUefaSeason, mapTeams, playersToCsv, uefaFetcher, uefaSeasonYear, type SheetReport } from "../src/data/uefa";
 import { allTeams } from "../src/teams";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -25,6 +26,8 @@ const P = {
   state: join(ROOT, "model/state.json"),
   report: join(ROOT, "REPORT.md"),
   players: join(ROOT, "data/players.csv"),
+  uefaTeams: join(ROOT, "data/uefa-teams.json"),
+  uefaAliases: join(ROOT, "data/manual/uefa-team-aliases.json"),
 };
 
 function arg(name: string): string | undefined {
@@ -79,7 +82,16 @@ async function main(): Promise<void> {
   const countries = Object.fromEntries(allTeams().map((t) => [t.id, t.country]));
 
   const params = readJson<Params>(P.params, DEFAULT_PARAMS);
-  // Written by the player importer, or by hand; team ids must match the match database (see teamId()).
+  // Player sheet from UEFA's Champions League stats. A failed or skipped fetch keeps the last good sheet.
+  let uefaNote = "";
+  if (!offline && !process.argv.includes("--no-uefa")) {
+    try {
+      uefaNote = await importUefaPlayers(today, matches);
+    } catch (err) {
+      uefaNote = `UEFA player import failed, kept the previous sheet: ${String(err)}`;
+      console.warn(uefaNote);
+    }
+  }
   const players = existsSync(P.players) ? parsePlayersCsv(readFileSync(P.players, "utf8")) : undefined;
   const out = runCycle({
     matches,
@@ -97,13 +109,38 @@ async function main(): Promise<void> {
   writeJson(P.events, out.events);
   writeJson(P.params, out.params);
   writeJson(P.state, out.state);
-  const sources = [...fetched.report.loaded.map((s) => `openfootball ${s}`), ...(manual.length ? [`${manual.length} provisional hand-entered CL rows`] : [])];
+  const sources = [
+    ...fetched.report.loaded.map((s) => `openfootball ${s}`),
+    ...(manual.length ? [`${manual.length} provisional hand-entered CL rows`] : []),
+    ...(uefaNote ? [uefaNote] : []),
+  ];
   writeFileSync(P.report, renderReport(out, today, backtest(matches, countries, out.params), out.params, sources));
 
   const played = matches.filter((m) => m.ft).length;
   console.log(
     `${today}: ${matches.length} matches (${played} played) · scored ${out.newlyScored.length} · new predictions ${out.newPredictions.length} · params v${out.params.version} · missing: ${fetched.report.missing.join(", ") || "none"}`,
   );
+}
+
+/** Fetches this and last season's UEFA Champions League player stats and writes data/players.csv. */
+async function importUefaPlayers(today: string, matches: { comp: string; home: string; away: string }[]): Promise<string> {
+  const season = seasonsUpTo(today).at(-1)!;
+  const year = uefaSeasonYear(season);
+  const current = await fetchUefaSeason(year, uefaFetcher);
+  if (!current) return `UEFA player stats: none published yet for ${season}`;
+  const previous = (await fetchUefaSeason(year - 1, uefaFetcher)) ?? [];
+  const inCl = new Set(matches.filter((m) => m.comp === "cl").flatMap((m) => [m.home, m.away]));
+  const ours = allTeams().map((t) => ({ id: t.id, name: t.name, country: t.country, inCl: inCl.has(t.id) }));
+  const aliases = readJson<Record<string, string>>(P.uefaAliases, {});
+  const teamMap = mapTeams(current, ours, aliases);
+  const { players, report } = buildPlayerSheet(current, previous, teamMap);
+  writeFileSync(P.players, playersToCsv(players));
+  writeJson(P.uefaTeams, {
+    season,
+    mapped: Object.fromEntries([...teamMap].filter(([, id]) => id).map(([uid, id]) => [uid, id])),
+    unmapped: report.unmapped,
+  } satisfies { season: string; mapped: Record<string, string | null>; unmapped: SheetReport["unmapped"] });
+  return `UEFA player stats ${season}: ${report.players} players from ${report.mappedTeams} clubs${report.unmapped.length ? `, ${report.unmapped.length} clubs unmapped (see data/uefa-teams.json)` : ""}`;
 }
 
 main().catch((err: unknown) => {

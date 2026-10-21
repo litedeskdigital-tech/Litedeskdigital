@@ -1,7 +1,7 @@
 name: UEFA probe (temporary)
 
-# Manual-only. Fetches a few UEFA endpoints and prints compact summaries, so the player importer can be
-# written against real data. To be removed before the importer is merged.
+# Manual-only. Runs this branch's update (with the UEFA player importer) and prints what it produced.
+# Commits nothing. To be removed before the importer is merged.
 on:
   workflow_dispatch:
 
@@ -11,26 +11,20 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: Probe
-        env:
-          UA: "Litedeskdigital-model/1.0 (+https://github.com/litedeskdigital-tech/Litedeskdigital)"
-          BASE: "https://compstats.uefa.com/v1/player-ranking?competitionId=1&phase=TOURNAMENT&order=DESC&optionalFields=PLAYER%2CTEAM&stats=goals,minutes_played_official,matches_appearance,penalty_scored"
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run update -- --no-tune
+      - name: Show importer output
         run: |
-          get() { curl -sS -m 30 -A "$UA" -H "Accept: application/json" "$1"; }
-          for y in 2027 2026; do
-            for off in 0 100 1000; do
-              echo "::group::season $y limit 100 offset $off"
-              get "$BASE&seasonYear=$y&limit=100&offset=$off" > p.json
-              jq -c 'if type=="array" then {count: length, first: (.[0] | {playerId, name: .player.internationalName, pos: .player.fieldPosition, det: .player.detailedFieldPosition, clubId: .player.clubId, team: (.team | {id, internationalName, countryCode, teamCode, typeTeam}), stats: [.statistics[] | {name, value}]}), last: (.[-1] | {name: .player.internationalName, stats: [.statistics[] | {name, value}]})} else . end' p.json
-              echo "::endgroup::"
-            done
-            echo "::group::season $y limit 1000"
-            get "$BASE&seasonYear=$y&limit=1000&offset=0" > big.json
-            jq -c 'if type=="array" then {count: length, teams: ([.[].team.id] | unique | length), withPens: ([.[] | select(any(.statistics[]; .name=="penalty_scored" and (.value|tonumber) > 0))] | length), statNames: ([.[].statistics[].name] | unique)} else . end' big.json
-            echo "::endgroup::"
-          done
-          echo "::group::default order without stats filter"
-          get "https://compstats.uefa.com/v1/player-ranking?competitionId=1&seasonYear=2027&limit=3&offset=0&optionalFields=PLAYER%2CTEAM&stats=minutes_played_official&order=DESC" | jq -c '[.[] | {name: .player.internationalName, stats: [.statistics[] | {name, value}]}]'
-          echo "::endgroup::"
+          echo "::group::uefa-teams.json"; cat data/uefa-teams.json | head -c 6000; echo; echo "::endgroup::"
+          echo "players: $(($(wc -l < data/players.csv) - 1))"
+          echo "::group::top of players.csv by rate"; (head -1 data/players.csv; tail -n +2 data/players.csv | sort -t, -k5 -gr | head -25); echo "::endgroup::"
+          echo "::group::penalty takers"; grep ',true$' data/players.csv | head -40; echo "::endgroup::"
+          echo "::group::report sources + upcoming"; grep -E "^Sources|Bonus scorer|^\| 2026" REPORT.md | head -30; echo "::endgroup::"

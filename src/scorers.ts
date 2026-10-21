@@ -89,6 +89,29 @@ export function loadPlayers(json: unknown): Player[] {
   return json.map((p, i) => validate(p as Player, `player ${i}`));
 }
 
+/** One CSV line into cells; double-quoted cells may contain commas, and "" inside them is a literal quote. */
+function splitCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i]!;
+    if (quoted) {
+      if (ch === '"' && line[i + 1] === '"') {
+        cell += '"';
+        i += 1;
+      } else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") {
+      cells.push(cell);
+      cell = "";
+    } else cell += ch;
+  }
+  cells.push(cell);
+  return cells;
+}
+
 /** CSV with header id,name,teamId,position,npGoalsPer90,expectedMinutes,penaltyTaker (true/false or 1/0). */
 export function parsePlayersCsv(csv: string): Player[] {
   const lines = csv.split(/\r?\n/).filter((l) => l.trim() !== "");
@@ -108,7 +131,7 @@ export function parsePlayersCsv(csv: string): Player[] {
     penaltyTaker: col("penaltyTaker"),
   };
   return lines.map((line, n) => {
-    const cells = line.split(",").map((c) => c.trim());
+    const cells = splitCsvLine(line).map((c) => c.trim());
     const pen = idx.penaltyTaker >= 0 ? (cells[idx.penaltyTaker] ?? "").toLowerCase() : "";
     return validate(
       {
