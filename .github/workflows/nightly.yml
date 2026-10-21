@@ -38,6 +38,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run update -- ${{ inputs.retune && '--retune' || '' }}
+      # The app feed is also committed (data/app.json) so the Android app can read it even without Pages.
+      - run: npm run app:data && cp app/public/data/app.json data/app.json
       - name: Commit updated model
         run: |
           git config user.name "model-bot"
@@ -49,7 +51,6 @@ jobs:
             git commit -m "Model update $(date -u +'%F %H:%M') UTC"
             git push origin HEAD:main
           fi
-      - run: npm run app:data
       - run: npm run app:build
       - uses: actions/upload-pages-artifact@v3
         with:
