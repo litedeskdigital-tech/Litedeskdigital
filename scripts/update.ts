@@ -12,6 +12,7 @@ import { clUrl, fetchOpenfootball, httpFetcher, leagueUrl, seasonsUpTo, type Fet
 import { backtest, runCycle, type LearningEvent, type LoggedPrediction } from "../src/learn";
 import { DEFAULT_PARAMS, type Params } from "../src/ratings";
 import { renderReport } from "../src/report";
+import { parsePlayersCsv } from "../src/scorers";
 import { allTeams } from "../src/teams";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -23,6 +24,7 @@ const P = {
   params: join(ROOT, "model/params.json"),
   state: join(ROOT, "model/state.json"),
   report: join(ROOT, "REPORT.md"),
+  players: join(ROOT, "data/players.csv"),
 };
 
 function arg(name: string): string | undefined {
@@ -77,6 +79,8 @@ async function main(): Promise<void> {
   const countries = Object.fromEntries(allTeams().map((t) => [t.id, t.country]));
 
   const params = readJson<Params>(P.params, DEFAULT_PARAMS);
+  // Written by the player importer, or by hand; team ids must match the match database (see teamId()).
+  const players = existsSync(P.players) ? parsePlayersCsv(readFileSync(P.players, "utf8")) : undefined;
   const out = runCycle({
     matches,
     countries,
@@ -85,6 +89,7 @@ async function main(): Promise<void> {
     events: readJson<LearningEvent[]>(P.events, []),
     today,
     noTune: process.argv.includes("--no-tune"),
+    players,
   });
 
   writeRows(P.db, { updatedAt: today, teams }, "matches", matches);

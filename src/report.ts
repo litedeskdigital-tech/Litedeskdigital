@@ -100,7 +100,7 @@ ${misses.length ? misses.map((p) => `- ${p.date} ${name(p.home)} v ${name(p.away
 
 ## Upcoming (next days)
 
-${upcoming.length ? ["| Date | Comp | Match | H / D / A | Pick | Margin | Score |", "|---|---|---|---|---|---|---|", ...upcoming.map((p) => `| ${p.date} | ${p.comp} | ${p.homeShort} v ${p.awayShort} | ${pct(p.fullTime.home)} / ${pct(p.fullTime.draw)} / ${pct(p.fullTime.away)} | ${name(p.winner.teamId)} ${pct(p.winner.pWin)} (${pct(p.winner.pWinCi[0])}–${pct(p.winner.pWinCi[1])})${p.winner.isHighProbability ? " ★" : ""} | ${p.mostLikelyMargin.label} | ${p.mostLikelyScore} |`)].join("\n") : "No fixtures in the horizon."}
+${upcoming.length ? ["| Date | Comp | Match | H / D / A | Pick | Margin | Score | Bonus scorer |", "|---|---|---|---|---|---|---|---|", ...upcoming.map((p) => `| ${p.date} | ${p.comp} | ${p.homeShort} v ${p.awayShort} | ${pct(p.fullTime.home)} / ${pct(p.fullTime.draw)} / ${pct(p.fullTime.away)} | ${name(p.winner.teamId)} ${pct(p.winner.pWin)} (${pct(p.winner.pWinCi[0])}–${pct(p.winner.pWinCi[1])})${p.winner.isHighProbability ? " ★" : ""} | ${p.mostLikelyMargin.label} | ${p.mostLikelyScore} | ${p.bonusScorer ? `${p.bonusScorer.name} ${pct(p.bonusScorer.pAnytime)}` : "–"} |`)].join("\n") : "No fixtures in the horizon."}
 
 ★ = high-probability pick (≥60% and the low end of its range ≥45%).
 
