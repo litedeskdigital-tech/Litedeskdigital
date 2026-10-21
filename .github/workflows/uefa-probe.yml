@@ -17,26 +17,18 @@ jobs:
         env:
           UA: "Litedeskdigital-model/1.0 (+https://github.com/litedeskdigital-tech/Litedeskdigital)"
         run: |
+          set +e
           get() { curl -sS -m 30 -A "$UA" -H "Accept: application/json" "$1"; }
+          slim='walk(if type=="object" then del(.translations, .images, .bigLogoUrl, .logoUrl, .mediumLogoUrl, .associationLogoUrl) else . end) | del(.playerEvents, .referees, .stadium, .competition, .relatedMatches, .lineupStatus, .condition)'
           M="https://match.uefa.com/v5/matches"
-          echo "::group::CL 2027 keys + one finished + one upcoming"
           get "$M?competitionId=1&seasonYear=2027&limit=200&offset=0&order=ASC" > m.json
-          jq -c 'length' m.json
-          jq -c '.[0] | keys' m.json
-          jq -c '[.[] | select(.status=="FINISHED")][-1] | {id, status, kickOffTime, round: (.round | {id, phase, mode, metaData, stage: .stage?}), matchday: (.matchday | {id, longName, name, type?}), type, score, winner: (.winner? | tostring), home: (.homeTeam | {id, internationalName, countryCode}), away: (.awayTeam | {id, internationalName, countryCode}), leg?, playerEvents: null}' m.json
-          jq -c '[.[] | select(.status!="FINISHED")][0] | {id, status, kickOffTime, round: (.round | {phase, metaData}), matchday: (.matchday | {longName}), home: .homeTeam.internationalName, away: .awayTeam.internationalName}' m.json
-          jq -c '[.[] | {phase: .round.phase, round: .round.metaData.name, status}] | group_by(.phase, .round, .status) | map({phase: .[0].phase, round: .[0].round, status: .[0].status, n: length})' m.json
-          echo "::endgroup::"
-          echo "::group::paging"
-          for off in 200 400; do get "$M?competitionId=1&seasonYear=2027&limit=200&offset=$off&order=ASC" | jq -c 'length'; done
-          echo "::endgroup::"
-          echo "::group::knockout example from 2026 (score shapes)"
+          echo "count $(jq length m.json)"
+          echo "::group::last finished (2027)"; jq -c "[.[] | select(.status==\"FINISHED\")][-1] | $slim" m.json; echo "::endgroup::"
+          echo "::group::first not finished (2027)"; jq -c "[.[] | select(.status!=\"FINISHED\")][0] | $slim" m.json; echo "::endgroup::"
+          echo "::group::phase/round/status counts"; jq -c '[.[] | {phase: .round.phase, round: .round.metaData.name, status}] | group_by([.phase, .round, .status]) | map(.[0] + {n: length})' m.json; echo "::endgroup::"
+          for off in 200 400; do echo "offset $off: $(get "$M?competitionId=1&seasonYear=2027&limit=200&offset=$off&order=ASC" | jq length)"; done
           get "$M?competitionId=1&seasonYear=2026&limit=200&offset=0&order=DESC" > k.json
-          jq -c 'length' k.json
-          jq -c '[.[] | select(.status=="FINISHED")] | .[0:3][] | {round: .round.metaData.name, phase: .round.phase, kick: .kickOffTime.date, home: .homeTeam.internationalName, away: .awayTeam.internationalName, score, leg: .leg?}' k.json
-          echo "::endgroup::"
+          echo "::group::2026 latest finished (knockouts, score shapes)"; jq -c "[.[] | select(.status==\"FINISHED\")] | .[0:3][] | $slim" k.json; echo "::endgroup::"
           for c in 14 2019; do
-            echo "::group::competition $c season 2027"
-            get "$M?competitionId=$c&seasonYear=2027&limit=200&offset=0&order=ASC" | jq -c 'if type=="array" then {n: length, finished: ([.[] | select(.status=="FINISHED")] | length), name: .[0].competition.metaData.name} else . end'
-            echo "::endgroup::"
+            echo "competition $c 2027: $(get "$M?competitionId=$c&seasonYear=2027&limit=200&offset=0&order=ASC" | jq -c 'if type=="array" then {n: length, finished: ([.[] | select(.status=="FINISHED")] | length)} else . end')"
           done
