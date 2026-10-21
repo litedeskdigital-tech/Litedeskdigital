@@ -2,7 +2,8 @@
 
 # Not yet published by openfootball. Scores were collected from uefa.com page snapshots that did not
 # fully agree, so treat them as provisional. Exact kick-off days within each matchday are not known;
-# dates below are placeholders inside the matchday window. This file is ignored automatically once
+# dates below are placeholders inside the matchday window (Matchday 3 dates and UTC kick-offs are from the
+# bet365 fixture list). This file is ignored automatically once
 # openfootball publishes champions-league/2026-27/cl.txt.
 
 ▪ League, Matchday 1
@@ -31,3 +32,15 @@
            Feyenoord Rotterdam (NED) v Como 1907 (ITA)          3-2
            LASK (AUT)              v Liverpool FC (ENG)       3-6
            AS Roma (ITA)           v Real Madrid CF (ESP)     3-4
+
+▪ League, Matchday 3
+  Wed Oct 21 2026
+    16:45  Como 1907 (ITA)         v Manchester United FC (ENG)
+           Lille OSC (FRA)         v Galatasaray SK (TUR)
+    19:00  Aston Villa FC (ENG)    v Viking FK (NOR)
+           FC Bayern München (GER) v Arsenal FC (ENG)
+           Club Brugge KV (BEL)    v Racing Club de Lens (FRA)
+           FC Internazionale Milano (ITA) v FK Shakhtar Donetsk (UKR)
+           Real Betis Balompié (ESP) v Feyenoord Rotterdam (NED)
+           Real Madrid CF (ESP)    v RB Leipzig (GER)
+           Sporting Clube de Portugal (POR) v LASK (AUT)
