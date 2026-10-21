@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { FIXTURES, type Fixture } from "../src/fixtures";
 import { capScore, fitRatings, PRIOR_RATINGS, expectedGoals } from "../src/posterior";
-import { generatePrediction, scoreGrid, type PredictInput } from "../src/predict";
+import { scoreGrid } from "../src/engine";
+import { generatePrediction, type PredictInput } from "../src/predict";
 
 const base: PredictInput = {
   homeId: "arsenal",
@@ -25,23 +26,23 @@ describe("scoreGrid", () => {
 describe("generatePrediction", () => {
   it("returns a three-way market that sums to one", () => {
     const p = generatePrediction(base);
-    expect(p.pHomeWin + p.pDraw + p.pAwayWin).toBeCloseTo(1, 2);
-    expect(p.pHomeWin).toBeGreaterThan(0.7);
+    expect(p.fullTime.home + p.fullTime.draw + p.fullTime.away).toBeCloseTo(1, 2);
+    expect(p.fullTime.home).toBeGreaterThan(0.7);
     expect(p.pHomeAdvance).toBeUndefined();
   });
 
   it("is reproducible with a seed", () => {
     const a = generatePrediction(base);
     const b = generatePrediction(base);
-    expect(a.pHomeWin).toBe(b.pHomeWin);
+    expect(a.fullTime.home).toBe(b.fullTime.home);
     expect(a.mostLikelyScore).toBe(b.mostLikelyScore);
   });
 
   it("gives the home side an edge in an even match-up", () => {
     const p = generatePrediction({ ...base, homeId: "lille", awayId: "stuttgart" });
-    expect(p.pHomeWin).toBeGreaterThan(p.pAwayWin);
+    expect(p.fullTime.home).toBeGreaterThan(p.fullTime.away);
     const n = generatePrediction({ ...base, homeId: "lille", awayId: "stuttgart", neutral: true });
-    expect(Math.abs(n.pHomeWin - n.pAwayWin)).toBeLessThan(0.02);
+    expect(Math.abs(n.fullTime.home - n.fullTime.away)).toBeLessThan(0.02);
   });
 
   it("prices a second leg from the aggregate", () => {

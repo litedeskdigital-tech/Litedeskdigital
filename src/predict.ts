@@ -1,10 +1,20 @@
+import { simulateMatch, N_SAMPLES } from "./engine";
 import { isKnockout as stageIsKnockout, type Fixture, type Score } from "./fixtures";
-import { homeEdge, ratingFor, UCL_MU, type Ratings } from "./posterior";
+import {
+  fullTime,
+  goalsMarkets,
+  marginBands,
+  pickWinner,
+  topScores,
+  type Confidence,
+  type FullTime,
+  type MarginBand,
+  type ScoreProb,
+  type WinnerPick,
+} from "./markets";
+import { teamGoalsPerGame, type Ratings } from "./posterior";
+import { anytimeScorers, type Player, type ScorerProb } from "./scorers";
 import { getTeam, type Stage, type Team } from "./teams";
-
-export type GoalDiffBin = { diff: number; p: number };
-export type ScoreProb = { home: number; away: number; p: number };
-export type Confidence = "High" | "Medium" | "Low";
 
 export type PredictInput = {
   homeId: string;
@@ -19,6 +29,8 @@ export type PredictInput = {
   sourceNote?: string;
   /** Live ratings from fitRatings; defaults to the Elo priors. */
   ratings?: Ratings;
+  /** Player sheet for either or both clubs; enables the anytime-scorer bonus pick. */
+  players?: Player[];
   /** Fixes the shock draws so a run can be reproduced. */
   seed?: number;
 };
@@ -43,169 +55,73 @@ export type Prediction = {
   neutral: boolean;
   venue: string;
   dateLabel: string;
-  pHomeWin: number;
-  pDraw: number;
-  pAwayWin: number;
-  /** Chance the home side of this match goes through; only set for knockout ties. */
-  pHomeAdvance?: number;
-  xgHome: number;
-  xgAway: number;
-  pOver25: number;
-  pBtts: number;
+  /** 90-minute home / draw / away. */
+  fullTime: FullTime;
+  /** The side more likely to win, how likely, and whether it clears the high-probability bar. */
+  winner: WinnerPick;
+  /** Winning-margin bands from home by 3+ to away by 3+. */
+  margins: MarginBand[];
+  mostLikelyMargin: MarginBand;
   mostLikelyScore: string;
   homeScore: number;
   awayScore: number;
   topScores: ScoreProb[];
-  bins: GoalDiffBin[];
+  xgHome: number;
+  xgAway: number;
+  pOver25: number;
+  pBtts: number;
+  /** Chance the home side of this match goes through; only set for knockout ties. */
+  pHomeAdvance?: number;
+  /** Highest anytime-scorer chance across both sheets; absent when no player data was given. */
+  bonusScorer?: ScorerProb;
+  /** Top anytime scorers across both clubs, most likely first. */
+  anytimeScorers: ScorerProb[];
+  scorerNote: string;
+  confidence: Confidence;
   modelMode: string;
   timestamp: string;
   commentary: string;
   formNote: string;
-  confidence: Confidence;
   sourceNote: string;
   nSamples: number;
 };
 
-const N_SAMPLES = 400;
-/** Score grid runs 0..MAX_GOALS per side; mass beyond it is renormalised away. */
-const MAX_GOALS = 10;
-const BIN_MIN = -5;
-const BIN_MAX = 5;
-/** Dixon–Coles low-score dependence: negative values lift 0-0 and 1-1 above independent Poisson. */
-export const DC_RHO = -0.07;
-/** Extra time is a third of a match. */
-const ET_FRACTION = 1 / 3;
-const PHI = 0.72;
-const SIGMA_FORM = 0.03;
-const FORM_SD = SIGMA_FORM / Math.sqrt(1 - PHI * PHI);
 const FORM_NOTE =
-  "Goals follow a Maher model with a Dixon–Coles low-score correction: each side's log scoring rate is its attack minus the opponent's defence plus a home edge. Attack and defence start from club Elo and get a damped update from league-phase results, with the winner's goals capped (6-0 counts as 3-0), so one rout cannot move a club far. AR(1) form and a match-pace shock are integrated over.";
-const MODEL_MODE = "Maher–Dixon–Coles v1 · damped posterior, UCL league phase";
-
-type Rng = () => number;
-
-/** mulberry32: small, fast, seedable. */
-function makeRng(seed: number): Rng {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function gaussian(rng: Rng): number {
-  let u = 0;
-  let v = 0;
-  while (u === 0) u = rng();
-  while (v === 0) v = rng();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
-
-function poissonPmf(lambda: number, max: number): number[] {
-  const out: number[] = [Math.exp(-lambda)];
-  for (let k = 1; k <= max; k += 1) out.push(out[k - 1]! * (lambda / k));
-  return out;
-}
-
-function tau(h: number, a: number, lh: number, la: number, rho: number): number {
-  if (h === 0 && a === 0) return 1 - lh * la * rho;
-  if (h === 0 && a === 1) return 1 + lh * rho;
-  if (h === 1 && a === 0) return 1 + la * rho;
-  if (h === 1 && a === 1) return 1 - rho;
-  return 1;
-}
-
-/** Score matrix grid[h][a], normalised to 1. rho = 0 gives independent Poisson. */
-export function scoreGrid(lh: number, la: number, rho = DC_RHO, max = MAX_GOALS): number[][] {
-  const ph = poissonPmf(lh, max);
-  const pa = poissonPmf(la, max);
-  const grid: number[][] = [];
-  let total = 0;
-  for (let h = 0; h <= max; h += 1) {
-    const row: number[] = [];
-    for (let a = 0; a <= max; a += 1) {
-      const p = Math.max(0, ph[h]! * pa[a]! * tau(h, a, lh, la, rho));
-      row.push(p);
-      total += p;
-    }
-    grid.push(row);
-  }
-  return grid.map((row) => row.map((p) => p / total));
-}
-
-/** Goal-difference distribution (home minus away) as a map from diff to probability. */
-function diffDist(grid: number[][]): Map<number, number> {
-  const out = new Map<number, number>();
-  grid.forEach((row, h) => row.forEach((p, a) => out.set(h - a, (out.get(h - a) ?? 0) + p)));
-  return out;
-}
-
-function convolve(x: Map<number, number>, y: Map<number, number>): Map<number, number> {
-  const out = new Map<number, number>();
-  for (const [dx, px] of x) {
-    for (const [dy, py] of y) out.set(dx + dy, (out.get(dx + dy) ?? 0) + px * py);
-  }
-  return out;
-}
-
-function shift(x: Map<number, number>, by: number): Map<number, number> {
-  return new Map([...x].map(([d, p]) => [d + by, p]));
-}
-
-/** Win chance from an aggregate diff: ahead goes through, level goes to extra time, then a coin-flip shoot-out. */
-function advanceFrom(aggregate: Map<number, number>, etFor: number, etAgainst: number): number {
-  const et = diffDist(scoreGrid(etFor, etAgainst, 0, 6));
-  let pLevel = 0;
-  let pAhead = 0;
-  for (const [d, p] of aggregate) {
-    if (d > 0) pAhead += p;
-    else if (d === 0) pLevel += p;
-  }
-  let pEtWin = 0;
-  let pEtLevel = 0;
-  for (const [d, p] of et) {
-    if (d > 0) pEtWin += p;
-    else if (d === 0) pEtLevel += p;
-  }
-  return pAhead + pLevel * (pEtWin + 0.5 * pEtLevel);
-}
+  "Goals follow a Maher model with a Dixon–Coles low-score correction: each side's log scoring rate is its attack minus the opponent's defence plus a home edge. Attack and defence start from club Elo and get a damped update from league-phase results, with the winner's goals capped (6-0 counts as 3-0), so one rout cannot move a club far. AR(1) form and a match-pace shock are integrated over. Scorers split their team's goals by non-penalty goals per 90 × expected minutes, with penalties to the named taker.";
+const MODEL_MODE = "Maher–Dixon–Coles v2 · full-time, margins, anytime scorer";
+const TOP_SCORERS = 6;
 
 function round3(x: number): number {
   return Math.round(x * 1000) / 1000;
 }
 
-function confidenceOf(pHome: number, pDraw: number, pAway: number): Confidence {
-  const top = Math.max(pHome, pDraw, pAway);
-  if (top > 0.6) return "High";
-  if (top > 0.45) return "Medium";
-  return "Low";
-}
-
 function buildCommentary(
   home: Team,
   away: Team,
-  pHome: number,
-  pDraw: number,
-  pAway: number,
+  ft: FullTime,
+  winner: WinnerPick,
+  band: MarginBand,
   pHomeAdvance: number | undefined,
-  input: PredictInput,
+  bonus: ScorerProb | undefined,
+  neutral: boolean,
 ): string {
+  const fav = winner.side === "home" ? home : away;
+  const pct = (p: number) => `${Math.round(p * 100)}%`;
   let text: string;
-  if (pHome >= 0.65) text = `${home.name} are strong favourites on current ratings.`;
-  else if (pHome >= 0.5) text = `Clear edge to ${home.name}, but one goal swings most Champions League nights.`;
-  else if (pAway >= 0.65) text = `${away.name} are strong favourites even away from home.`;
-  else if (pAway >= 0.5) text = `${away.name} are favoured despite travelling.`;
-  else if (pDraw >= 0.28) text = "Very even match-up with a live chance of a draw.";
-  else text = `Slight lean to ${pHome >= pAway ? home.name : away.name}. Expect a tight contest.`;
-  if (input.neutral) text += " Neutral venue, so no home edge is applied.";
-  if (pHomeAdvance !== undefined) {
-    const fav = pHomeAdvance >= 0.5 ? home : away;
-    const p = Math.max(pHomeAdvance, 1 - pHomeAdvance);
-    text += ` ${fav.name} go through ${Math.round(p * 100)}% of the time, counting extra time and penalties.`;
+  if (winner.isHighProbability) {
+    text = `${fav.name} are the high-probability pick: ${pct(winner.pWin)} to win in 90 minutes, most likely by ${winner.likelyMargin === 3 ? "3 or more" : winner.likelyMargin}.`;
+  } else if (ft.draw >= winner.pWin - 0.1) {
+    text = `No strong favourite. ${fav.name} edge it at ${pct(winner.pWin)}, but the draw is live at ${pct(ft.draw)}.`;
+  } else {
+    text = `${fav.name} lean at ${pct(winner.pWin)} (${pct(winner.pDrawNoBet)} with the draw voided); not a banker.`;
   }
+  text += ` Single most likely margin: ${band.label} (${pct(band.p)}).`;
+  if (neutral) text += " Neutral venue, so no home edge is applied.";
+  if (pHomeAdvance !== undefined) {
+    const through = pHomeAdvance >= 0.5 ? home : away;
+    text += ` ${through.name} go through ${pct(Math.max(pHomeAdvance, 1 - pHomeAdvance))} of the time, counting extra time and penalties.`;
+  }
+  if (bonus) text += ` Bonus scorer: ${bonus.name} (${pct(bonus.pAnytime)} anytime).`;
   return text;
 }
 
@@ -222,87 +138,35 @@ function formatTimestamp(date: Date): string {
 export function generatePrediction(input: PredictInput): Prediction {
   const home = getTeam(input.homeId);
   const away = getTeam(input.awayId);
-  const knockout = stageIsKnockout(input);
   const neutral = input.neutral ?? false;
-  const rng = makeRng(input.seed ?? Math.floor(Math.random() * 2 ** 32));
-  const shock = knockout ? 0.12 : 0.08;
+  const sim = simulateMatch(input);
 
-  const h = ratingFor(home.id, input.ratings);
-  const a = ratingFor(away.id, input.ratings);
-  const edge = homeEdge(neutral);
-  const tieMode: "leg1" | "leg2" | "single" | undefined = !knockout
-    ? undefined
-    : input.leg === 1
-      ? "leg1"
-      : input.leg === 2
-        ? "leg2"
-        : "single";
-  if (tieMode === "leg2" && !input.firstLeg) {
-    throw new Error("A second leg needs the first-leg score to price the tie");
-  }
-
-  const size = MAX_GOALS + 1;
-  const grid: number[][] = Array.from({ length: size }, () => new Array<number>(size).fill(0));
-  let xgHome = 0;
-  let xgAway = 0;
-  let advance = 0;
-
-  for (let i = 0; i < N_SAMPLES; i += 1) {
-    const formGap = gaussian(rng) * FORM_SD - gaussian(rng) * FORM_SD;
-    const pace = Math.exp(gaussian(rng) * shock - 0.5 * shock * shock);
-    const lh = Math.exp(UCL_MU + edge + h.attack - a.defence + formGap) * pace;
-    const la = Math.exp(UCL_MU + a.attack - h.defence - formGap) * pace;
-    const sample = scoreGrid(lh, la);
-    for (let x = 0; x < size; x += 1) {
-      for (let y = 0; y < size; y += 1) grid[x]![y]! += sample[x]![y]! / N_SAMPLES;
-    }
-    xgHome += lh / N_SAMPLES;
-    xgAway += la / N_SAMPLES;
-
-    if (tieMode) {
-      const diff = diffDist(sample);
-      if (tieMode === "single") {
-        advance += advanceFrom(diff, lh * ET_FRACTION, la * ET_FRACTION) / N_SAMPLES;
-      } else if (tieMode === "leg2") {
-        // This match's home side was away in leg 1.
-        const lead = input.firstLeg!.away - input.firstLeg!.home;
-        advance += advanceFrom(shift(diff, lead), lh * ET_FRACTION, la * ET_FRACTION) / N_SAMPLES;
-      } else {
-        // Leg 2 at the other ground, form carried over, fresh pace.
-        const pace2 = Math.exp(gaussian(rng) * shock - 0.5 * shock * shock);
-        const l2For = Math.exp(UCL_MU + h.attack - a.defence + formGap) * pace2;
-        const l2Against = Math.exp(UCL_MU + edge + a.attack - h.defence - formGap) * pace2;
-        const leg2 = diffDist(scoreGrid(l2Against, l2For));
-        const leg2ForHome = new Map([...leg2].map(([d, p]) => [-d, p]));
-        advance +=
-          advanceFrom(convolve(diff, leg2ForHome), l2For * ET_FRACTION, l2Against * ET_FRACTION) / N_SAMPLES;
-      }
-    }
-  }
-
-  let pHome = 0;
-  let pDraw = 0;
-  let pAway = 0;
-  let pOver25 = 0;
-  let pBtts = 0;
-  const scores: ScoreProb[] = [];
-  const bins: GoalDiffBin[] = [];
-  for (let d = BIN_MIN; d <= BIN_MAX; d += 1) bins.push({ diff: d, p: 0 });
-  grid.forEach((row, x) =>
-    row.forEach((p, y) => {
-      if (x > y) pHome += p;
-      else if (x === y) pDraw += p;
-      else pAway += p;
-      if (x + y > 2) pOver25 += p;
-      if (x > 0 && y > 0) pBtts += p;
-      scores.push({ home: x, away: y, p });
-      const d = Math.min(BIN_MAX, Math.max(BIN_MIN, x - y));
-      bins[d - BIN_MIN]!.p += p;
-    }),
-  );
-  scores.sort((s, t) => t.p - s.p);
+  const ft = fullTime(sim.grid);
+  const bands = marginBands(sim.grid, home.shortName, away.shortName);
+  const winner = pickWinner(ft, bands, home.id, away.id);
+  const likelyBand = [...bands].sort((x, y) => y.p - x.p)[0]!;
+  const scores = topScores(sim.grid);
   const best = scores[0]!;
-  const pHomeAdvance = tieMode ? round3(advance) : undefined;
+  const goals = goalsMarkets(sim.grid);
+
+  const players = input.players ?? [];
+  const homePlayers = players.filter((p) => p.teamId === home.id);
+  const awayPlayers = players.filter((p) => p.teamId === away.id);
+  const scorers = [
+    ...anytimeScorers(homePlayers, sim.samples, "home", teamGoalsPerGame(home.id, input.ratings)),
+    ...anytimeScorers(awayPlayers, sim.samples, "away", teamGoalsPerGame(away.id, input.ratings)),
+  ]
+    .sort((x, y) => y.pAnytime - x.pAnytime)
+    .slice(0, TOP_SCORERS)
+    .map((s) => ({ ...s, pAnytime: round3(s.pAnytime), share: round3(s.share) }));
+  const missing = [homePlayers.length ? "" : home.name, awayPlayers.length ? "" : away.name].filter(Boolean);
+  const scorerNote =
+    missing.length === 2
+      ? "No player data loaded, so no scorer pick. Load a player sheet with loadPlayers or parsePlayersCsv."
+      : missing.length === 1
+        ? `No player data for ${missing[0]}; the bonus pick only covers the other side.`
+        : "Anytime chances over 90 minutes; penalties go to the named taker.";
+  const pHomeAdvance = sim.pHomeAdvance === undefined ? undefined : round3(sim.pHomeAdvance);
 
   return {
     id:
@@ -322,34 +186,45 @@ export function generatePrediction(input: PredictInput): Prediction {
     awayMarkFg: away.markFg,
     stage: input.stage,
     leg: input.leg,
-    isKnockout: knockout,
+    isKnockout: stageIsKnockout(input),
     neutral,
     venue: input.venue,
     dateLabel: input.dateLabel,
-    pHomeWin: round3(pHome),
-    pDraw: round3(pDraw),
-    pAwayWin: round3(pAway),
-    pHomeAdvance,
-    xgHome: Math.round(xgHome * 100) / 100,
-    xgAway: Math.round(xgAway * 100) / 100,
-    pOver25: round3(pOver25),
-    pBtts: round3(pBtts),
+    fullTime: { home: round3(ft.home), draw: round3(ft.draw), away: round3(ft.away) },
+    winner: {
+      ...winner,
+      pWin: round3(winner.pWin),
+      pNotLose: round3(winner.pNotLose),
+      pDrawNoBet: round3(winner.pDrawNoBet),
+    },
+    margins: bands.map((b) => ({ ...b, p: round3(b.p) })),
+    mostLikelyMargin: { ...likelyBand, p: round3(likelyBand.p) },
     mostLikelyScore: `${best.home}–${best.away}`,
     homeScore: best.home,
     awayScore: best.away,
-    topScores: scores.slice(0, 5).map((s) => ({ ...s, p: round3(s.p) })),
-    bins: bins.map((b) => ({ ...b, p: round3(b.p) })),
+    topScores: scores.map((s) => ({ ...s, p: round3(s.p) })),
+    xgHome: Math.round(sim.xgHome * 100) / 100,
+    xgAway: Math.round(sim.xgAway * 100) / 100,
+    pOver25: round3(goals.pOver25),
+    pBtts: round3(goals.pBtts),
+    pHomeAdvance,
+    bonusScorer: scorers[0],
+    anytimeScorers: scorers,
+    scorerNote,
+    confidence: winner.confidence,
     modelMode: MODEL_MODE,
     timestamp: formatTimestamp(new Date()),
-    commentary: buildCommentary(home, away, pHome, pDraw, pAway, pHomeAdvance, input),
+    commentary: buildCommentary(home, away, ft, winner, likelyBand, pHomeAdvance, scorers[0], neutral),
     formNote: FORM_NOTE,
-    confidence: confidenceOf(pHome, pDraw, pAway),
     sourceNote: input.sourceNote ?? "",
     nSamples: N_SAMPLES,
   };
 }
 
-export function inputFromFixture(fixture: Fixture, sourceNote?: string, ratings?: Ratings): PredictInput {
+export function inputFromFixture(
+  fixture: Fixture,
+  opts: { sourceNote?: string; ratings?: Ratings; players?: Player[]; seed?: number } = {},
+): PredictInput {
   return {
     homeId: fixture.homeId,
     awayId: fixture.awayId,
@@ -359,8 +234,7 @@ export function inputFromFixture(fixture: Fixture, sourceNote?: string, ratings?
     firstLeg: fixture.firstLeg,
     venue: fixture.venue,
     dateLabel: fixture.dateLabel,
-    sourceNote,
-    ratings,
+    ...opts,
   };
 }
 
@@ -373,10 +247,11 @@ export type HistoryItem = Pick<
   | "awayAbbr"
   | "homeShort"
   | "awayShort"
+  | "fullTime"
+  | "winner"
+  | "mostLikelyMargin"
   | "mostLikelyScore"
-  | "pHomeWin"
-  | "pDraw"
-  | "pAwayWin"
+  | "bonusScorer"
   | "pHomeAdvance"
   | "stage"
   | "isKnockout"
@@ -394,10 +269,11 @@ export function toHistoryItem(prediction: Prediction): HistoryItem {
     awayAbbr: prediction.awayAbbr,
     homeShort: prediction.homeShort,
     awayShort: prediction.awayShort,
+    fullTime: prediction.fullTime,
+    winner: prediction.winner,
+    mostLikelyMargin: prediction.mostLikelyMargin,
     mostLikelyScore: prediction.mostLikelyScore,
-    pHomeWin: prediction.pHomeWin,
-    pDraw: prediction.pDraw,
-    pAwayWin: prediction.pAwayWin,
+    bonusScorer: prediction.bonusScorer,
     pHomeAdvance: prediction.pHomeAdvance,
     stage: prediction.stage,
     isKnockout: prediction.isKnockout,

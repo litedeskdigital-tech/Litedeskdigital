@@ -113,3 +113,8 @@ export function liveStrength(id: string, ratings: Ratings = PRIOR_RATINGS): numb
   const r = ratingFor(id, ratings);
   return Math.exp(UCL_MU + r.attack) - Math.exp(UCL_MU - r.defence);
 }
+
+/** A club's usual goals per game: against an average side, half its games at home. Scorer shares are measured against it. */
+export function teamGoalsPerGame(id: string, ratings: Ratings = PRIOR_RATINGS): number {
+  return Math.exp(UCL_MU + UCL_H / 2 + ratingFor(id, ratings).attack);
+}
