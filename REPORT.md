@@ -2,7 +2,7 @@
 
 Generated 2026-10-21. Ratings include results up to 2026-10-14. Parameter set v2 (tuned 2026-10-21).
 
-Sources: openfootball cl 2023-24, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball cl 2024-25, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball cl 2025-26, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 21 provisional hand-entered CL rows, UEFA player stats 2026-27: 592 players from 34 clubs, 2 clubs unmapped (see data/uefa-teams.json).
+Sources: openfootball cl 2023-24, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball cl 2024-25, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball cl 2025-26, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA player stats 2026-27: 592 players from 34 clubs, 2 clubs unmapped (see data/uefa-teams.json).
 
 ## Live record (predictions frozen before kick-off)
 
@@ -31,6 +31,15 @@ None yet.
 
 | Date | Comp | Match | H / D / A | Pick | Margin | Score | Bonus scorer |
 |---|---|---|---|---|---|---|---|
+| 2026-10-21 | cl | Villa v Viking | 51% / 18% / 31% | Villa 51% (21%–82%) | Villa by 3+ | 2–1 | Nicolas Jackson 47% |
+| 2026-10-21 | cl | Brugge v Lens | 48% / 20% / 32% | Brugge 48% (28%–70%) | Draw | 2–1 | Nicolò Tresoldi 49% |
+| 2026-10-21 | cl | Como v Man Utd | 38% / 21% / 41% | Man Utd 41% (26%–58%) | Draw | 1–1 | Assane Diao 27% |
+| 2026-10-21 | cl | Bayern v Arsenal | 38% / 23% / 39% | Arsenal 39% (26%–54%) | Draw | 1–1 | Harry Kane 38% |
+| 2026-10-21 | cl | Inter v Shakhtar Donetsk | 80% / 11% / 9% | Inter 80% (59%–96%) ★ | Inter by 3+ | 3–0 | Lautaro Martínez 56% |
+| 2026-10-21 | cl | Lille v Galatasaray | 61% / 19% / 19% | Lille 61% (41%–81%) | Lille by 1 | 1–0 | Ayase Ueda 34% |
+| 2026-10-21 | cl | Betis v Feyenoord | 61% / 18% / 21% | Betis 61% (45%–76%) | Betis by 3+ | 2–1 | Troy Parrott 34% |
+| 2026-10-21 | cl | Real Madrid v Leipzig | 71% / 15% / 14% | Real Madrid 71% (57%–84%) ★ | Real Madrid by 3+ | 2–1 | Kylian Mbappé 67% |
+| 2026-10-21 | cl | Sporting v LASK | 92% / 4% / 4% | Sporting 92% (74%–100%) ★ | Sporting by 3+ | 5–0 | Luis Suárez 71% |
 | 2026-10-21 | es.1 | Levante v Athletic Club | 35% / 25% / 40% | Athletic Club 40% (28%–55%) | Draw | 1–1 | – |
 | 2026-10-23 | de.1 | Stuttgart v Borussia Mönchengladbach | 68% / 16% / 16% | Stuttgart 68% (54%–81%) ★ | Stuttgart by 3+ | 2–1 | Ermedin Demirović 37% |
 | 2026-10-23 | en.1 | Ipswich Town v Nottingham Forest | 23% / 23% / 54% | Nottingham Forest 54% (39%–71%) | Nottingham Forest by 1 | 0–1 | – |
