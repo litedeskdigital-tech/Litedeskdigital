@@ -2,7 +2,7 @@
 
 Generated 2026-10-21. Ratings include results up to 2026-10-20. Parameter set v3 (tuned 2026-10-21).
 
-Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 2843 rows, 265 new clubs, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 625 players from 36 clubs.
+Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 624 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 625 players from 36 clubs.
 
 ## Live record (predictions frozen before kick-off)
 
@@ -149,6 +149,20 @@ None yet.
 | 2026-10-31 | nl.1 | Heerenveen v NEC | 41% / 21% / 38% | Heerenveen 41% (28%–54%) | Draw | 1–1 | – |
 | 2026-10-31 | pt.1 | Porto v GD Estoril | 75% / 16% / 10% | Porto 75% (64%–85%) ★ | Porto by 3+ | 2–0 | Pepê 23% |
 | 2026-10-31 | pt.1 | Moreirense v Estrela da | 47% / 25% / 28% | Moreirense 47% (35%–60%) | Draw | 1–0 | – |
+
+### Champions League scenarios (5,000 minute-by-minute simulations each)
+
+| Match | First goal H / none / A | Favourite wins after conceding first | Favourite trails / trails by 2 | Favourite drops a lead | Likeliest HT/FT | Late winner (level at 75') | Goal in each 15' block |
+|---|---|---|---|---|---|---|---|
+| Villa v Viking | 73% / 1% / 26% | Villa: 49% | 32% / 10% | 11% | H/H 57%, D/H 15% | 9% | 49% 52% 53% 54% 59% 63% |
+| Brugge v Lens | 59% / 3% / 38% | Brugge: 26% | 47% / 18% | 18% | H/H 35%, D/H 16% | 11% | 40% 43% 44% 45% 49% 53% |
+| Como v Man Utd | 48% / 3% / 49% | Man Utd: 18% | 58% / 27% | 21% | A/A 25%, H/H 22% | 12% | 40% 43% 44% 45% 49% 53% |
+| Bayern v Arsenal | 48% / 5% / 47% | Arsenal: 15% | 56% / 25% | 18% | A/A 23%, H/H 22% | 12% | 35% 38% 39% 40% 44% 48% |
+| Inter v Shakhtar Donetsk | 76% / 1% / 23% | Inter: 51% | 27% / 7% | 9% | H/H 60%, D/H 16% | 8% | 46% 50% 50% 52% 56% 60% |
+| Lille v Galatasaray | 57% / 4% / 38% | Lille: 21% | 46% / 17% | 16% | H/H 32%, D/H 16% | 11% | 36% 39% 40% 40% 45% 49% |
+| Betis v Feyenoord | 63% / 2% / 35% | Betis: 32% | 43% / 15% | 16% | H/H 40%, D/H 16% | 11% | 42% 45% 47% 47% 52% 56% |
+| Real Madrid v Leipzig | 70% / 2% / 28% | Real Madrid: 45% | 34% / 10% | 12% | H/H 51%, D/H 17% | 10% | 44% 47% 48% 49% 54% 58% |
+| Sporting v LASK | 86% / 1% / 13% | Sporting: 69% | 15% / 3% | 4% | H/H 74%, D/H 15% | 5% | 50% 53% 54% 54% 59% 64% |
 
 ★ = high-probability pick (≥60% and the low end of its range ≥45%).
 
