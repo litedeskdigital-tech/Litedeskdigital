@@ -59,31 +59,30 @@ jobs:
             git push origin HEAD:${{ github.ref_name }}
           fi
       - name: Export gate
-        run: npx expo export --platform android 2>&1 | tee export.log && grep -q "Android Bundled" export.log
+        run: npx expo export --platform android 2>&1 | tee "$RUNNER_TEMP/export.log" && grep -q "Android Bundled" "$RUNNER_TEMP/export.log" && rm -rf dist
       - name: Build (preview APK)
         id: build
         run: |
-          rm -rf dist
           npx -y eas-cli@latest build --platform android --profile preview --non-interactive --no-wait --json \
-            --message "UCL Match Model standalone APK" > build.json
-          cat build.json
-          BUILD_ID=$(node -p "const b=require('./build.json'); (Array.isArray(b)?b[0]:b).id")
+            --message "UCL Match Model standalone APK" > "$RUNNER_TEMP/build.json"
+          cat "$RUNNER_TEMP/build.json"
+          BUILD_ID=$(node -p "const b=require(process.env.RUNNER_TEMP+'/build.json'); (Array.isArray(b)?b[0]:b).id")
           echo "id=$BUILD_ID" >> "$GITHUB_OUTPUT"
       - name: Wait for FINISHED
         id: wait
         run: |
           for i in $(seq 1 160); do
-            npx -y eas-cli@latest build:view ${{ steps.build.outputs.id }} --json > view.json 2>/dev/null || true
-            STATUS=$(node -p "try{require('./view.json').status}catch{''}")
+            npx -y eas-cli@latest build:view ${{ steps.build.outputs.id }} --json > "$RUNNER_TEMP/view.json" 2>/dev/null || true
+            STATUS=$(node -p "try{JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP+'/view.json','utf8')).status}catch{''}")
             echo "$(date -u +%T) status=$STATUS"
             case "$STATUS" in
               FINISHED) break ;;
-              ERRORED|CANCELED) cat view.json; exit 1 ;;
+              ERRORED|CANCELED) cat "$RUNNER_TEMP/view.json"; exit 1 ;;
             esac
             sleep 30
           done
           [ "$STATUS" = "FINISHED" ] || { echo "::error::build did not finish in time"; exit 1; }
-          URL=$(node -p "const a=require('./view.json').artifacts; a.buildUrl || a.applicationArchiveUrl")
+          URL=$(node -p "const a=JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP+'/view.json','utf8')).artifacts; a.buildUrl || a.applicationArchiveUrl")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "APK artifact: $URL"
           echo "Build page: https://expo.dev/accounts/${{ steps.who.outputs.account }}/projects/$(node -p "require('./app.json').expo.slug")/builds/${{ steps.build.outputs.id }}"
