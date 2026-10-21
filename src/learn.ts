@@ -37,6 +37,15 @@ export type LoggedPrediction = {
   pick: { side: "home" | "away"; teamId: string; pWin: number; isHighProbability: boolean };
   mostLikelyMargin: string;
   mostLikelyScore: string;
+  /** Scenario summary from the 5,000 simulations, frozen with the odds. */
+  scenario?: {
+    firstGoalHome: number;
+    firstGoalAway: number;
+    favTrailsAtSomePoint: number;
+    favWinsIfConcedesFirst: number;
+    favDropsLead: number;
+    htft: string;
+  };
   /** Anytime-scorer bonus pick, when a player sheet covered either club. */
   bonusScorer?: { playerId: string; name: string; teamId: string; pAnytime: number };
   result?: { home: number; away: number };
@@ -98,6 +107,14 @@ export function toLogged(pred: Prediction, matchId: string, madeAt: string): Log
     },
     mostLikelyMargin: pred.mostLikelyMargin.label,
     mostLikelyScore: pred.mostLikelyScore,
+    scenario: {
+      firstGoalHome: pred.scenarios.firstGoal.home,
+      firstGoalAway: pred.scenarios.firstGoal.away,
+      favTrailsAtSomePoint: pred.scenarios.favourite.trailsAtSomePoint,
+      favWinsIfConcedesFirst: pred.scenarios.favourite.winsIfConcedesFirst,
+      favDropsLead: pred.scenarios.favourite.dropsLead,
+      htft: pred.scenarios.htft[0]!.key,
+    },
     bonusScorer: pred.bonusScorer && {
       playerId: pred.bonusScorer.playerId,
       name: pred.bonusScorer.name,

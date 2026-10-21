@@ -56,6 +56,25 @@ function wf(w: WalkForward): string {
   return `all ${w.all.n} matches log loss ${f3(w.all.logLoss)}, accuracy ${pct(w.all.accuracy)}; Champions League ${w.cl.n} matches log loss ${f3(w.cl.logLoss)}, accuracy ${pct(w.cl.accuracy)}`;
 }
 
+/** Scenario view for Champions League fixtures: how the 5,000 simulated games unfold. */
+function scenarioTable(preds: CycleOutput["upcoming"]): string {
+  if (!preds.length) return "";
+  const rows = preds.map((p) => {
+    const s = p.scenarios;
+    const f = s.favourite;
+    const fav = f.side === "home" ? p.homeShort : p.awayShort;
+    const blocks = s.goalInBlock.map((x) => pct(x)).join(" ");
+    return `| ${p.homeShort} v ${p.awayShort} | ${pct(s.firstGoal.home)} / ${pct(s.firstGoal.none)} / ${pct(s.firstGoal.away)} | ${fav}: ${pct(f.winsIfConcedesFirst)} | ${pct(f.trailsAtSomePoint)} / ${pct(f.trailsByTwo)} | ${pct(f.dropsLead)} | ${s.htft[0]!.key} ${pct(s.htft[0]!.p)}, ${s.htft[1]!.key} ${pct(s.htft[1]!.p)} | ${pct(s.lateWinner)} | ${blocks} |`;
+  });
+  return [
+    "### Champions League scenarios (5,000 minute-by-minute simulations each)",
+    "",
+    "| Match | First goal H / none / A | Favourite wins after conceding first | Favourite trails / trails by 2 | Favourite drops a lead | Likeliest HT/FT | Late winner (level at 75') | Goal in each 15' block |",
+    "|---|---|---|---|---|---|---|---|",
+    ...rows,
+  ].join("\n");
+}
+
 export function renderReport(out: CycleOutput, today: string, backtest: WalkForward, params: Params, sources: string[]): string {
   const scored = out.log.filter((p) => p.logLoss !== undefined);
   const clScored = scored.filter((p) => p.comp === "cl");
@@ -101,6 +120,8 @@ ${misses.length ? misses.map((p) => `- ${p.date} ${name(p.home)} v ${name(p.away
 ## Upcoming (next days)
 
 ${upcoming.length ? ["| Date | Comp | Match | H / D / A | Pick | Margin | Score | Bonus scorer |", "|---|---|---|---|---|---|---|---|", ...upcoming.map((p) => `| ${p.date} | ${p.comp} | ${p.homeShort} v ${p.awayShort} | ${pct(p.fullTime.home)} / ${pct(p.fullTime.draw)} / ${pct(p.fullTime.away)} | ${name(p.winner.teamId)} ${pct(p.winner.pWin)} (${pct(p.winner.pWinCi[0])}–${pct(p.winner.pWinCi[1])})${p.winner.isHighProbability ? " ★" : ""} | ${p.mostLikelyMargin.label} | ${p.mostLikelyScore} | ${p.bonusScorer ? `${p.bonusScorer.name} ${pct(p.bonusScorer.pAnytime)}` : "–"} |`)].join("\n") : "No fixtures in the horizon."}
+
+${scenarioTable(upcoming.filter((p) => p.comp === "cl"))}
 
 ★ = high-probability pick (≥60% and the low end of its range ≥45%).
 
