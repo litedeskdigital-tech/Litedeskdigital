@@ -43,6 +43,18 @@ openfootball ──► data/matches.json ──► rating filter ──► model
 
    A model that changes itself after every miss overreacts: a 70% favourite should still lose 3 times in 10.
 
+## Player stats and the bonus scorer
+
+Every night, `src/data/uefa.ts` reads UEFA's public Champions League player statistics (`compstats.uefa.com`), for this season and last season, and writes `data/players.csv`.
+
+- **Scoring rate:** non-penalty goals per 90. Last season counts at half weight, and the rate is shrunk toward a position prior, so a hot week can't make anyone a 1.3-a-game striker.
+- **Expected minutes:** this season's minutes per club match.
+- **Penalty taker:** each club's top penalty scorer.
+- **Club matching:** UEFA club names are matched to the database by country and name, preferring clubs with Champions League history. Clubs that can't be matched safely are listed in `data/uefa-teams.json`, never guessed. Add `"<uefa team id>": "<our team id>"` to `data/manual/uefa-team-aliases.json` to fix one by hand.
+- **Requests:** about 10 per night, with an identifying user agent. A failed fetch keeps the previous sheet.
+- **Limits:** only Champions League minutes and goals are counted (domestic form isn't), and injuries aren't known.
+- **Terms:** UEFA's terms restrict automated collection of its data; the repo owner has accepted that risk. Run `npm run update -- --no-uefa` to skip the import.
+
 ## Running
 
 ```sh

@@ -97,6 +97,9 @@ export const uefaFetcher: Fetcher = async (url) => {
 
 const NOISE = new Set(["fc", "cf", "afc", "sc", "sk", "fk", "ac", "as", "ssc", "rc", "cd", "rcd", "ud", "sd", "kv", "vfb", "vfl", "tsg", "sv", "bv", "osc", "pae", "sl", "nk", "gnk", "bsc", "club", "de", "del", "of", "the", "and", "1"]);
 
+/** UEFA abbreviations that are not prefixes of the full word. */
+const SYNONYMS: Record<string, string> = { utd: "united" };
+
 function tokens(name: string): string[] {
   return name
     .normalize("NFD")
@@ -104,7 +107,8 @@ function tokens(name: string): string[] {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .split(" ")
-    .filter((t) => t && !NOISE.has(t));
+    .filter((t) => t && !NOISE.has(t))
+    .map((t) => SYNONYMS[t] ?? t);
 }
 
 /** A UEFA token matches one of ours if it equals it, is a prefix of it ("b" → "borussia", "man" → "manchester"), or abbreviates a run of ours ("cp" → "clube portugal"). */

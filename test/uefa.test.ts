@@ -82,6 +82,7 @@ describe("UEFA player importer", () => {
         { uefaTeamId: "4", teamName: "Sporting CP", country: "POR" },
         { uefaTeamId: "5", teamName: "Sporting", country: "POR" },
         { uefaTeamId: "6", teamName: "Nowhere United", country: "ENG" },
+        { uefaTeamId: "7", teamName: "Man Utd", country: "ENG" },
       ],
       ours,
       { "5": "sporting-clube-de-braga" },
@@ -92,6 +93,7 @@ describe("UEFA player importer", () => {
     expect(m.get("4")).toBe("sporting-clube-de-portugal");
     expect(m.get("5")).toBe("sporting-clube-de-braga");
     expect(m.get("6")).toBeNull();
+    expect(m.get("7")).toBe("manchester-united-fc");
   });
 
   it("builds a shrunk, penalty-free scoring rate, expected minutes and one penalty taker per club", () => {
