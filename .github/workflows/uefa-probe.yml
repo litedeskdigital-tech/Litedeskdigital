@@ -1,7 +1,7 @@
 name: UEFA probe (temporary)
 
-# Manual-only. Fetches a few UEFA endpoints and prints the start of each response, so the player importer
-# can be written against real data. To be removed before the importer is merged.
+# Manual-only. Fetches a few UEFA endpoints and prints compact summaries, so the player importer can be
+# written against real data. To be removed before the importer is merged.
 on:
   workflow_dispatch:
 
@@ -16,19 +16,21 @@ jobs:
       - name: Probe
         env:
           UA: "Litedeskdigital-model/1.0 (+https://github.com/litedeskdigital-tech/Litedeskdigital)"
+          BASE: "https://compstats.uefa.com/v1/player-ranking?competitionId=1&phase=TOURNAMENT&order=DESC&optionalFields=PLAYER%2CTEAM&stats=goals,minutes_played_official,matches_appearance,penalty_scored"
         run: |
-          probe() {
-            echo "::group::$1"
-            code=$(curl -sS -m 20 -A "$UA" -H "Accept: application/json" -o body.txt -w "%{http_code} %{content_type}" "$1" || echo "curl-failed")
-            echo "STATUS $code SIZE $(wc -c < body.txt 2>/dev/null || echo 0)"
-            head -c 2500 body.txt 2>/dev/null; echo
+          get() { curl -sS -m 30 -A "$UA" -H "Accept: application/json" "$1"; }
+          for y in 2027 2026; do
+            for off in 0 100 1000; do
+              echo "::group::season $y limit 100 offset $off"
+              get "$BASE&seasonYear=$y&limit=100&offset=$off" > p.json
+              jq -c 'if type=="array" then {count: length, first: (.[0] | {playerId, name: .player.internationalName, pos: .player.fieldPosition, det: .player.detailedFieldPosition, clubId: .player.clubId, team: (.team | {id, internationalName, countryCode, teamCode, typeTeam}), stats: [.statistics[] | {name, value}]}), last: (.[-1] | {name: .player.internationalName, stats: [.statistics[] | {name, value}]})} else . end' p.json
+              echo "::endgroup::"
+            done
+            echo "::group::season $y limit 1000"
+            get "$BASE&seasonYear=$y&limit=1000&offset=0" > big.json
+            jq -c 'if type=="array" then {count: length, teams: ([.[].team.id] | unique | length), withPens: ([.[] | select(any(.statistics[]; .name=="penalty_scored" and (.value|tonumber) > 0))] | length), statNames: ([.[].statistics[].name] | unique)} else . end' big.json
             echo "::endgroup::"
-          }
-          for host in www.uefa.com compstats.uefa.com comp.uefa.com match.uefa.com; do probe "https://$host/robots.txt"; done
-          for y in 2026 2027; do
-            probe "https://compstats.uefa.com/v1/player-ranking?competitionId=1&seasonYear=$y&phase=TOURNAMENT&order=DESC&limit=5&offset=0&optionalFields=PLAYER%2CTEAM&stats=goals,minutes_played_official,matches_appearance,penalty_scored"
           done
-          probe "https://compstats.uefa.com/v1/player-ranking?competitionId=1&seasonYear=2026&limit=5&offset=0&optionalFields=PLAYER%2CTEAM&stats=goals"
-          probe "https://comp.uefa.com/v2/stats/players?competitionId=1&seasonYear=2026&limit=5"
-          probe "https://match.uefa.com/v5/matches?competitionId=1&seasonYear=2027&limit=3&offset=0&order=ASC"
-          probe "https://comp.uefa.com/v2/teams?competitionId=1&seasonYear=2027&limit=3"
+          echo "::group::default order without stats filter"
+          get "https://compstats.uefa.com/v1/player-ranking?competitionId=1&seasonYear=2027&limit=3&offset=0&optionalFields=PLAYER%2CTEAM&stats=minutes_played_official&order=DESC" | jq -c '[.[] | {name: .player.internationalName, stats: [.statistics[] | {name, value}]}]'
+          echo "::endgroup::"
