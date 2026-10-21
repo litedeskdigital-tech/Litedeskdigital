@@ -1,6 +1,7 @@
 import { isPlayed, type Match } from "./data/types";
 import { quickFullTime } from "./engine";
 import { generatePrediction, type Model, type Prediction } from "./predict";
+import type { Player } from "./scorers";
 import { runFilter, viewMatch, type Params, type State } from "./ratings";
 import { getTeam } from "./teams";
 import { outcomeOf, tune, walkForward, type Outcome, type WalkForward } from "./tune";
@@ -36,6 +37,8 @@ export type LoggedPrediction = {
   pick: { side: "home" | "away"; teamId: string; pWin: number; isHighProbability: boolean };
   mostLikelyMargin: string;
   mostLikelyScore: string;
+  /** Anytime-scorer bonus pick, when a player sheet covered either club. */
+  bonusScorer?: { playerId: string; name: string; teamId: string; pAnytime: number };
   result?: { home: number; away: number };
   scoredAt?: string;
   logLoss?: number;
@@ -95,6 +98,12 @@ export function toLogged(pred: Prediction, matchId: string, madeAt: string): Log
     },
     mostLikelyMargin: pred.mostLikelyMargin.label,
     mostLikelyScore: pred.mostLikelyScore,
+    bonusScorer: pred.bonusScorer && {
+      playerId: pred.bonusScorer.playerId,
+      name: pred.bonusScorer.name,
+      teamId: pred.bonusScorer.teamId,
+      pAnytime: pred.bonusScorer.pAnytime,
+    },
   };
 }
 
@@ -165,6 +174,8 @@ export type CycleInput = {
   today: string;
   /** Skip tuning (tests, quick runs). */
   noTune?: boolean;
+  /** Player sheet (data/players.csv); enables the anytime-scorer bonus pick. */
+  players?: Player[];
 };
 
 export type CycleOutput = {
@@ -278,7 +289,7 @@ export function runCycle(input: CycleInput): CycleOutput {
     if (isPlayed(m) || m.date < today || m.date > horizon) continue;
     const firstLeg = m.leg === 2 ? matches.find((x) => x.leg === 1 && x.stage === m.stage && x.season === m.season && x.home === m.away && x.away === m.home)?.ft : undefined;
     if (m.leg === 2 && !firstLeg) continue;
-    const pred = generatePrediction({ match: m, model, firstLeg, seed: 1 });
+    const pred = generatePrediction({ match: m, model, firstLeg, players: input.players, seed: 1 });
     upcoming.push(pred);
     if (!logged.has(m.id)) {
       const entry = toLogged(pred, m.id, today);

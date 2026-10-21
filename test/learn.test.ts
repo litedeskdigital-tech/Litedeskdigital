@@ -70,3 +70,14 @@ describe("learning cycle", () => {
     expect(res.params.version).toBe(res.improved ? DEFAULT_PARAMS.version + 1 : DEFAULT_PARAMS.version);
   });
 });
+
+describe("player sheet in the nightly cycle", () => {
+  it("freezes a bonus scorer with the prediction when a sheet covers the club", () => {
+    const players = [
+      { id: "s9", name: "Striker", teamId: ids[0]!, position: "FW" as const, npGoalsPer90: 0.6, expectedMinutes: 85, penaltyTaker: true },
+    ];
+    const out = runCycle({ matches: [...past, fixture], countries, params: DEFAULT_PARAMS, log: [], events: [], today: "2026-03-01", noTune: true, players });
+    expect(out.log[0]!.bonusScorer).toMatchObject({ playerId: "s9", teamId: ids[0] });
+    expect(out.upcoming[0]!.bonusScorer?.playerId).toBe("s9");
+  });
+});
