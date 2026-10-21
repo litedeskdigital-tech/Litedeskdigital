@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "UCL Match Model",
+    "slug": "ucl-match-model",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B1F4D"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.litedeskdigital.uclmatchmodel"
+    },
+    "android": {
+      "package": "com.litedeskdigital.uclmatchmodel",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#0B1F4D",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
