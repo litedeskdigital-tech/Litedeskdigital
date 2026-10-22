@@ -36,34 +36,9 @@ jobs:
           cache-dependency-path: mobile/package-lock.json
       - run: npm ci
       - name: Expo login (token, else device login)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ -n "$EXPO_TOKEN" ]; then echo "Using EXPO_TOKEN"; exit 0; fi
-          unset EXPO_TOKEN
-          # Device login: the link and code below are approved on expo.dev by the account owner, who reads back
-          # the number Expo shows. That number arrives as the file match-<run id>.txt on the expo-login branch.
-          npx -y eas-cli@latest login --device --non-interactive 2>&1 | tee "$RUNNER_TEMP/login.txt"
-          REQ=$(grep -oiE 'resume[[:space:]]+[A-Za-z0-9_-]{8,}' "$RUNNER_TEMP/login.txt" | head -1 | awk '{print $2}')
-          echo "request id: ${REQ:-not parsed}"
-          # Job logs are only readable after the job ends, so publish the approval link where it can be read now.
-          curl -fsS -X PUT -H "Authorization: Bearer $GH_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/contents/login-${{ github.run_id }}.txt" \
-            -d "$(node -e "const fs=require('fs');process.stdout.write(JSON.stringify({message:'Expo device login for run ${{ github.run_id }}',branch:'expo-login',content:Buffer.from(fs.readFileSync(process.env.RUNNER_TEMP+'/login.txt')).toString('base64')}))")" > /dev/null
-          echo "Waiting for the approval number (file match-${{ github.run_id }}.txt on branch expo-login)..."
-          for i in $(seq 1 90); do
-            BODY=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github.raw" \
-              "https://api.github.com/repos/${{ github.repository }}/contents/match-${{ github.run_id }}.txt?ref=expo-login" 2>/dev/null || true)
-            if [ -n "$BODY" ]; then
-              set -- $BODY
-              if [ $# -ge 2 ]; then REQ=$1; NUM=$2; else NUM=$1; fi
-              npx -y eas-cli@latest login --device --non-interactive --resume "$REQ" --match "$NUM"
-              npx -y eas-cli@latest whoami --non-interactive
-              exit 0
-            fi
-            sleep 10
-          done
-          echo "::error::No approval number arrived within 15 minutes"; exit 1
+        uses: ./.github/actions/expo-login
+        with:
+          github-token: ${{ github.token }}
       - name: Expo account
         id: who
         run: |

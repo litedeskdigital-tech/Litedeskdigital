@@ -12,6 +12,8 @@
   --bad: #b91c1c;
   --star: #b45309;
   --cl: #0b1f4d;
+  --el: #c2410c;
+  --ecl: #15803d;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -31,6 +33,8 @@
     --bad: #f87171;
     --star: #fbbf24;
     --cl: #93c5fd;
+    --el: #fb923c;
+    --ecl: #4ade80;
   }
 }
 * {
@@ -144,6 +148,12 @@ section[hidden] {
 }
 .card.cl {
   border-left: 4px solid var(--cl);
+}
+.card.el {
+  border-left: 4px solid var(--el);
+}
+.card.ecl {
+  border-left: 4px solid var(--ecl);
 }
 .meta {
   display: flex;

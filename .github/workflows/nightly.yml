@@ -1,11 +1,12 @@
-name: Model update (every 6 hours)
+name: Model update (every 30 minutes)
 
-# Pulls new results (openfootball, UEFA), scores frozen predictions, updates ratings, refreshes the latest call
+# Pulls fixtures and results (openfootball; UEFA Champions League, Europa League and Conference League), scores
+# frozen predictions, updates ratings, refreshes the latest call
 # for every fixture before kick-off, re-tunes when the prediction log shows a lasting slip (or every 60 days),
 # commits data, model state and REPORT.md straight to main, then rebuilds and publishes the app to GitHub Pages.
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "7,37 * * * *"
   workflow_dispatch:
     inputs:
       retune:
@@ -49,6 +50,8 @@ jobs:
             echo "No changes"
           else
             git commit -m "Model update $(date -u +'%F %H:%M') UTC"
+            # Someone may have merged to main while this ran; the bot only touches data files, so a rebase is safe.
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
       - run: npm run app:build
@@ -59,6 +62,9 @@ jobs:
   deploy:
     needs: update
     runs-on: ubuntu-latest
+    # Fails until GitHub Pages is enabled (Settings → Pages → Source: GitHub Actions). The Android app reads the
+    # committed data/app.json, so this must not turn every half-hourly run red.
+    continue-on-error: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

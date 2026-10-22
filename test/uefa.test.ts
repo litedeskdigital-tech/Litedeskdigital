@@ -44,6 +44,11 @@ describe("UEFA player importer", () => {
     expect(url.searchParams.get("stats")).toContain("penalty_scored");
   });
 
+  it("asks for the Champions League by default and any other UEFA competition by id", () => {
+    expect(new URL(rankingUrl(2027, 0)).searchParams.get("competitionId")).toBe("1");
+    expect(new URL(rankingUrl(2027, 0, 14)).searchParams.get("competitionId")).toBe("14");
+  });
+
   it("parses a real response row", () => {
     expect(parseRanking([ROW])[0]).toEqual({
       playerId: "250080553", name: "Serhou Guirassy", fieldPosition: "FORWARD", detailedPosition: "STRIKER",

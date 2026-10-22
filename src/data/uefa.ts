@@ -3,8 +3,8 @@ import { bestMatch, UEFA_NAME_ALIASES, type TeamRef } from "./names";
 import type { Fetcher } from "./openfootball";
 
 /**
- * UEFA's public competition-stats API (the one uefa.com's own statistics pages read). Only the Champions League
- * (competitionId 1) is used. UEFA counts seasons by the year they end: 2026-27 is seasonYear 2027.
+ * UEFA's public competition-stats API (the one uefa.com's own statistics pages read), for the three club
+ * competitions (see UEFA_COMPETITIONS). UEFA counts seasons by the year they end: 2026-27 is seasonYear 2027.
  */
 export const UEFA_RANKING = "https://compstats.uefa.com/v1/player-ranking";
 export const UEFA_USER_AGENT = "Litedeskdigital-model/1.0 (+https://github.com/litedeskdigital-tech/Litedeskdigital)";
@@ -37,9 +37,10 @@ export function uefaSeasonYear(season: string): number {
   return Number(season.slice(0, 4)) + 1;
 }
 
-export function rankingUrl(seasonYear: number, offset: number): string {
+/** competitionId: 1 Champions League, 14 Europa League, 2019 Conference League. */
+export function rankingUrl(seasonYear: number, offset: number, competitionId = 1): string {
   const q = new URLSearchParams({
-    competitionId: "1",
+    competitionId: String(competitionId),
     seasonYear: String(seasonYear),
     phase: "TOURNAMENT",
     order: "DESC",
@@ -72,11 +73,11 @@ export function parseRanking(rows: RankingRow[]): UefaPlayer[] {
     });
 }
 
-/** Every player row for one season, a page of 100 at a time; null when the season has no data yet. */
-export async function fetchUefaSeason(seasonYear: number, fetcher: Fetcher): Promise<UefaPlayer[] | null> {
+/** Every player row for one competition season, a page of 100 at a time; null when the season has no data yet. */
+export async function fetchUefaSeason(seasonYear: number, fetcher: Fetcher, competitionId = 1): Promise<UefaPlayer[] | null> {
   const out: UefaPlayer[] = [];
   for (let page = 0; page < MAX_PAGES; page += 1) {
-    const text = await fetcher(rankingUrl(seasonYear, page * PAGE));
+    const text = await fetcher(rankingUrl(seasonYear, page * PAGE, competitionId));
     if (text === null) return page === 0 ? null : out;
     const rows = JSON.parse(text) as RankingRow[] | null;
     if (!Array.isArray(rows) || rows.length === 0) break;
@@ -119,11 +120,11 @@ export function mapTeams(
 
 /**
  * Prior non-penalty goals per 90 by position. A player's own rate is shrunk toward it by PRIOR_MATCHES
- * matches' worth of weight, so three Champions League games cannot make anyone a 1.3-a-game striker.
+ * matches' worth of weight, so three European games cannot make anyone a 1.3-a-game striker.
  */
 export const POSITION_PRIOR: Record<Position, number> = { FW: 0.35, AM: 0.2, MF: 0.08, DF: 0.03, GK: 0 };
 export const PRIOR_MATCHES = 4;
-/** Last season's Champions League counts at this weight next to this season's. */
+/** Last season's European counts at this weight next to this season's. */
 export const PREVIOUS_SEASON_WEIGHT = 0.5;
 /** Players expected to play less than this are left off the sheet. */
 export const MIN_EXPECTED_MINUTES = 10;
@@ -139,7 +140,7 @@ export function positionOf(field: string, detailed: string): Position {
 export type SheetReport = { players: number; mappedTeams: number; unmapped: { uefaTeamId: string; name: string; country: string }[] };
 
 /**
- * One row per player in this season's Champions League. Scoring rate pools this season and (at half weight)
+ * One row per player in this season's UEFA club competitions. Scoring rate pools this season and (at half weight)
  * last season, minus penalties, shrunk toward the position prior. Expected minutes are this season's minutes
  * over the club's matches so far. The club's penalty taker is its player with the most penalty goals.
  */

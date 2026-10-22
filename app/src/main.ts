@@ -1,8 +1,11 @@
 import type { AppData, AppFixture, AppResult, AppTeam, RecordSummary } from "../../src/appData";
 import "./style.css";
 
-/** The data changes every 6 hours; the page checks for a new file every 10 minutes and when it regains focus. */
-const POLL_MS = 10 * 60 * 1000;
+/** The data changes every 30 minutes; the page checks for a new file every 5 minutes and when it regains focus. */
+const POLL_MS = 5 * 60 * 1000;
+/** UEFA's club competitions, listed first and marked with their own colour. */
+const UEFA = ["cl", "el", "ecl"];
+const compClass = (comp: string) => (UEFA.includes(comp) ? ` ${comp}` : "");
 const DATA_URL = "./data/app.json";
 
 let data: AppData | null = null;
@@ -98,7 +101,7 @@ function fixtureCard(f: AppFixture): string {
   const w = p.winner;
   const pickName = w.side === "home" ? f.home.short : f.away.short;
   const isOpen = open.has(f.id);
-  return `<article class="card${f.comp === "cl" ? " cl" : ""}">
+  return `<article class="card${compClass(f.comp)}">
     <div class="meta"><span class="comp">${esc(f.compName)}</span><time>${esc(when(f))}</time></div>
     <div class="teams">${teamRow(f.home, p.pHomeCi)}${teamRow(f.away, p.pAwayCi)}</div>
     ${bar(p.fullTime.home, p.fullTime.draw, p.fullTime.away)}
@@ -118,7 +121,7 @@ function fixtureCard(f: AppFixture): string {
 function resultCard(r: AppResult): string {
   const c = r.call;
   const pick = c ? (c.pickTeamId === r.home.id ? r.home.short : r.away.short) : "";
-  return `<article class="card result${r.comp === "cl" ? " cl" : ""}">
+  return `<article class="card result${compClass(r.comp)}">
     <div class="meta"><span class="comp">${esc(r.compName)}</span><time>${esc(when(r))}</time></div>
     <div class="score">
       <span class="team">${badge(r.home)}<span class="name">${esc(r.home.short)}</span></span>
@@ -146,7 +149,15 @@ function recordCard(title: string, r: RecordSummary): string {
 }
 
 function renderModel(d: AppData): string {
-  return `<div class="grid">${recordCard("Champions League", d.record.cl)}${recordCard("All competitions", d.record.all)}</div>
+  // Older feeds (before the Europa and Conference League were added) have no el/ecl records.
+  const uefa = (
+    [
+      ["Champions League", d.record.cl],
+      ["Europa League", d.record.el],
+      ["Conference League", d.record.ecl],
+    ] as const
+  ).filter(([, r]) => r && r.n > 0);
+  return `<div class="grid">${uefa.map(([t, r]) => recordCard(t, r!)).join("")}${recordCard("All competitions", d.record.all)}</div>
     ${
       d.record.calibration.length
         ? `<h3>Calibration</h3><table class="kv"><thead><tr><th>Predicted band</th><th>Average predicted</th><th>Happened</th><th>n</th></tr></thead><tbody>
@@ -163,7 +174,8 @@ function renderModel(d: AppData): string {
 function renderFilters(d: AppData): void {
   const comps = new Map<string, string>();
   for (const x of [...d.fixtures, ...d.results]) comps.set(x.comp, x.compName);
-  const chips = [["all", "All"], ...[...comps].sort((a, b) => (a[0] === "cl" ? -1 : b[0] === "cl" ? 1 : a[1].localeCompare(b[1])))];
+  const rank = (c: string) => UEFA.indexOf(c) >>> 0;
+  const chips = [["all", "All"], ...[...comps].sort((a, b) => rank(a[0]) - rank(b[0]) || a[1].localeCompare(b[1]))];
   $("filters").hidden = tab === "model";
   $("filters").innerHTML = chips
     .map(([code, name]) => `<button class="chip" aria-pressed="${filter === code}" data-comp="${esc(code!)}">${esc(name!)}</button>`)
