@@ -1,0 +1,40 @@
+name: Probe Sportradar stats
+
+# One-off reachability probe: can a GitHub runner read the Sportradar stats behind statshub.sportradar.com, and
+# what does the match data look like? Saves status lines and the first part of each response as a run artifact.
+on:
+  push:
+    branches: [claude/uefa-championship-fixtures-ym5uzy]
+    paths: [.github/workflows/probe-sportradar.yml]
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe
+        run: |
+          mkdir -p out
+          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+          i=0
+          for url in \
+            "https://statshub.sportradar.com/bet365/en/match/74172992/report" \
+            "https://stats.fn.sportradar.com/bet365/en/Europe:London/gismo/match_info/74172992" \
+            "https://stats.fn.sportradar.com/bet365/en/Europe:London/gismo/match_timeline/74172992" \
+            "https://stats.fn.sportradar.com/bet365/en/Europe:London/gismo/match_detailsextended/74172992" \
+            "https://stats.fn.sportradar.com/common/en/Etc:UTC/gismo/match_info/74172992" \
+            "https://statshub.sportradar.com/robots.txt" \
+            "https://stats.fn.sportradar.com/robots.txt"; do
+            i=$((i+1))
+            code=$(curl -sS -L -A "$UA" -o "out/$i.body" -w "%{http_code} %{content_type} %{size_download}" --max-time 20 "$url" || echo "curl-failed")
+            echo "$i $code $url" | tee -a out/status.txt
+            head -c 3000 "out/$i.body" > "out/$i.head" 2>/dev/null || true
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sportradar-probe
+          path: out/*.head
+      - name: Show
+        run: |
+          cat out/status.txt
+          for f in out/*.head; do echo "=== $f"; head -c 1500 "$f"; echo; done
