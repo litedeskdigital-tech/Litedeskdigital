@@ -1,0 +1,76 @@
+name: Model update (every 30 minutes)
+
+# The model update on Expo's workers instead of GitHub Actions (same script as .github/workflows/nightly.yml):
+# pull fixtures and results, Sportradar team news / xG / odds, score, learn, predict, then commit data, model state
+# and REPORT.md to main. Scheduled runs need a paid EAS plan and this repo linked to the Expo project, and only
+# run from the GitHub repo's default branch.
+#
+# EAS environment variables (production, visibility "Secret"):
+#   GH_PUSH_TOKEN        fine-grained GitHub token, this repo only, Contents: read and write
+#   SPORTRADAR_API_KEY   Soccer Extended v4 key
+#   SPORTRADAR_ODDS_KEY  Odds Comparison Prematch v2 key
+#
+# The encrypted Sportradar store (src/data/sportradar.ts) is kept between runs as the single file store.enc on the
+# orphan branch model-store, replaced each run so it never grows history. It is AES-GCM sealed with the API key.
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+
+defaults:
+  tools:
+    node: '22'
+
+jobs:
+  update:
+    name: Update model
+    environment: production
+    steps:
+      - name: Clone main
+        run: |
+          git clone --depth 1 --branch main "https://x-access-token:${GH_PUSH_TOKEN}@github.com/litedeskdigital-tech/Litedeskdigital.git" "$HOME/model"
+          cd "$HOME/model"
+          git config user.name "model-bot"
+          git config user.email "model-bot@users.noreply.github.com"
+      - name: Restore Sportradar store
+        run: |
+          cd "$HOME/model"
+          mkdir -p .cache/sportradar
+          if git fetch --depth 1 origin model-store 2>/dev/null; then
+            git show FETCH_HEAD:store.enc > .cache/sportradar/store.enc || rm -f .cache/sportradar/store.enc
+          fi
+      - name: Install and check
+        run: |
+          cd "$HOME/model"
+          npm ci
+          npm run typecheck
+          npm test
+      - name: Update
+        run: |
+          cd "$HOME/model"
+          npm run update
+          npm run app:data
+          cp app/public/data/app.json data/app.json
+      - name: Commit to main
+        run: |
+          cd "$HOME/model"
+          git add data model REPORT.md
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Model update $(date -u +'%F %H:%M') UTC (EAS)"
+            git pull --rebase --depth 50 origin main
+            git push origin HEAD:main
+          fi
+      - name: Save Sportradar store
+        run: |
+          cd "$HOME/model"
+          [ -f .cache/sportradar/store.enc ] || { echo "No store to save"; exit 0; }
+          STORE="$HOME/store"
+          rm -rf "$STORE" && mkdir -p "$STORE" && cp .cache/sportradar/store.enc "$STORE/store.enc"
+          cd "$STORE"
+          git init -q -b model-store
+          git config user.name "model-bot"
+          git config user.email "model-bot@users.noreply.github.com"
+          git add store.enc
+          git commit -q -m "Sportradar store (encrypted) $(date -u +'%F %H:%M') UTC"
+          git push -f "https://x-access-token:${GH_PUSH_TOKEN}@github.com/litedeskdigital-tech/Litedeskdigital.git" model-store
