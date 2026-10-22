@@ -25,6 +25,20 @@ jobs:
     name: Update model
     environment: production
     steps:
+      - name: Check secrets
+        run: |
+          # Names only; the values are never printed.
+          for name in SPORTRADAR_API_KEY SPORTRADAR_ODDS_KEY; do
+            if [ -n "${!name}" ]; then echo "OK      $name"; else echo "MISSING $name (the update runs without it)"; fi
+          done
+          if [ -z "$GH_PUSH_TOKEN" ]; then
+            echo "MISSING GH_PUSH_TOKEN: add it under expo.dev > ucl-match-model > Environment variables > production (Secret)"
+            exit 1
+          fi
+          # A token that GitHub rejects fails here, before the 2-minute update, not at the push.
+          curl -fsS -o /dev/null -H "Authorization: Bearer $GH_PUSH_TOKEN" https://api.github.com/repos/litedeskdigital-tech/Litedeskdigital \
+            || { echo "GH_PUSH_TOKEN is set but GitHub rejects it (expired, or not granted this repo)"; exit 1; }
+          echo "OK      GH_PUSH_TOKEN"
       - name: Clone main
         run: |
           git clone --depth 1 --branch main "https://x-access-token:${GH_PUSH_TOKEN}@github.com/litedeskdigital-tech/Litedeskdigital.git" "$HOME/model"

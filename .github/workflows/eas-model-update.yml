@@ -31,7 +31,9 @@ jobs:
       - name: Check EAS secrets
         run: |
           [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
-          npx -y eas-cli@latest env:list --environment production --non-interactive 2>&1 | tee "$RUNNER_TEMP/env.txt" | grep -vE '^[[:space:]]*Value' || true
+          # Names only: secret values are not listed.
+          npx -y eas-cli@latest env:list --environment production 2>&1 | grep -E '^[A-Z_]+|Name' > "$RUNNER_TEMP/env.txt" || true
+          cat "$RUNNER_TEMP/env.txt"
           for name in GH_PUSH_TOKEN SPORTRADAR_API_KEY SPORTRADAR_ODDS_KEY; do
             if grep -q "$name" "$RUNNER_TEMP/env.txt"; then echo "OK      $name"; else echo "MISSING $name"; fi
           done

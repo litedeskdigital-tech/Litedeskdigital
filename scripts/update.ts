@@ -188,6 +188,7 @@ async function main(): Promise<void> {
   }
   writeFileSync(P.report, renderReport(out, today, backtest(learnFrom, countries, out.params), out.params, sources, notes));
 
+  console.log(notes.find((n) => n.startsWith("Sportradar:")) ?? "Sportradar: no keys set (SPORTRADAR_API_KEY / SPORTRADAR_ODDS_KEY), skipped");
   const played = matches.filter((m) => m.ft).length;
   console.log(
     `${today}: ${matches.length} matches (${played} played) · scored ${out.newlyScored.length} · new predictions ${out.newPredictions.length} · params v${out.params.version} · missing: ${fetched.report.missing.join(", ") || "none"}`,
