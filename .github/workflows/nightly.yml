@@ -1,7 +1,7 @@
 name: Model update (every 30 minutes)
 
-# Pulls fixtures and results (openfootball; UEFA Champions League, Europa League and Conference League), scores
-# frozen predictions, updates ratings, refreshes the latest call
+# Pulls fixtures and results (openfootball; UEFA Champions League, Europa League and Conference League) and, with
+# Sportradar keys, team news, xG and odds for the UEFA matches; scores frozen predictions, updates ratings, refreshes the latest call
 # for every fixture before kick-off, re-tunes when the prediction log shows a lasting slip (or every 60 days),
 # commits data, model state and REPORT.md straight to main, then rebuilds and publishes the app to GitHub Pages.
 on:
@@ -38,7 +38,19 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # Licensed Sportradar data lives only in this cache (private to the repo's Actions), never in git: each run
+      # restores the newest copy and saves its own.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/sportradar
+          key: sportradar-${{ github.run_id }}
+          restore-keys: sportradar-
       - run: npm run update -- ${{ inputs.retune && '--retune' || '' }}
+        env:
+          # Optional: without them the update runs exactly as before.
+          SPORTRADAR_API_KEY: ${{ secrets.SPORTRADAR_API_KEY }}
+          SPORTRADAR_ODDS_KEY: ${{ secrets.SPORTRADAR_ODDS_KEY }}
+          SPORTRADAR_ACCESS: ${{ vars.SPORTRADAR_ACCESS }}
       # The app feed is also committed (data/app.json) so the Android app can read it even without Pages.
       - run: npm run app:data && cp app/public/data/app.json data/app.json
       - name: Commit updated model

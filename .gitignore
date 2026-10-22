@@ -1,3 +1,5 @@
 node_modules/
 app/dist/
 app/public/data/
+# Licensed Sportradar data (Actions cache only, never committed)
+.cache/

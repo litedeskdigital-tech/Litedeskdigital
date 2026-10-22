@@ -23,8 +23,13 @@ export type Match = {
   home: string;
   away: string;
   neutral?: boolean;
-  /** 90-minute score; absent for fixtures not yet played. The model only learns from this. */
+  /** 90-minute score; absent for fixtures not yet played. The model learns from this (and xg, when present). */
   ft?: Score;
+  /**
+   * Expected goals from licensed match stats (Sportradar). Held in memory only: it is attached from the private
+   * cache before learning and never written to the public data files.
+   */
+  xg?: Score;
   /** Score after extra time and the shoot-out, when a knockout went that far. */
   aet?: Score;
   pens?: Score;

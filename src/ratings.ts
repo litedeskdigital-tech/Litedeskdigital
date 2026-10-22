@@ -57,6 +57,12 @@ export const DEFAULT_PARAMS: Params = {
   compHalfLifeDays: 365,
 };
 
+/**
+ * When a match has expected goals, the filter learns from this mix of goals and xG instead of goals alone: xG is the
+ * less noisy measure of how the game went, goals are what counts. Not tuned (xG only covers recent UEFA matches).
+ */
+export const XG_WEIGHT = 0.5;
+
 /** Pseudo-matches pulling a competition's goal base toward the global default until it has data. */
 const COMP_PSEUDO = 30;
 const DEFAULT_HOME_GOALS = 1.55;
@@ -210,7 +216,10 @@ export function rateMatch(state: State, m: Match & { ft: Score }, countries: Rec
   const ac = countries[m.away] ?? "";
   const th = teamAt(state, m.home, hc, m.date, params);
   const ta = teamAt(state, m.away, ac, m.date, params);
-  const y = capScore(m.ft, params.goalCap);
+  const capped = capScore(m.ft, params.goalCap);
+  const y = m.xg
+    ? { home: (1 - XG_WEIGHT) * capped.home + XG_WEIGHT * m.xg.home, away: (1 - XG_WEIGHT) * capped.away + XG_WEIGHT * m.xg.away }
+    : capped;
   const base = m.neutral ? mu : mu + edge;
 
   if (hc !== ac) {
