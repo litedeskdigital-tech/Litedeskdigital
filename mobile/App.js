@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
+import * as Updates from 'expo-updates';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,14 +17,18 @@ import {
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 /**
- * The model publishes one JSON file every 6 hours: committed to the repo, and also served by GitHub Pages.
- * The app tries each in turn, keeps the last good copy on the device, and shows it offline.
+ * The model publishes one JSON file every 30 minutes: committed to the repo, and also served by GitHub Pages.
+ * The app tries each in turn, keeps the last good copy on the device, and shows it offline. It checks every
+ * 30 minutes and whenever it comes to the foreground; app code itself arrives over the air (EAS Update).
  */
 const SOURCES = [
   'https://raw.githubusercontent.com/litedeskdigital-tech/Litedeskdigital/main/data/app.json',
   'https://litedeskdigital-tech.github.io/Litedeskdigital/data/app.json',
 ];
-const POLL_MS = 10 * 60 * 1000;
+const POLL_MS = 30 * 60 * 1000;
+/** UEFA's club competitions: listed first, each with its own colour stripe. */
+const UEFA = ['cl', 'el', 'ecl'];
+const rank = (comp) => UEFA.indexOf(comp) >>> 0;
 const KEY_DATA = 'ucl:data';
 const KEY_PREFS = 'ucl:prefs';
 const TABS = [
@@ -67,8 +72,8 @@ async function fetchLatest() {
 
 function palette(dark) {
   return dark
-    ? { bg: '#0b1020', card: '#141a2e', text: '#e5e7eb', muted: '#9aa3b5', line: '#26304a', accent: '#60a5fa', home: '#3b82f6', draw: '#6b7280', away: '#ef4444', good: '#4ade80', bad: '#f87171', star: '#fbbf24', cl: '#93c5fd' }
-    : { bg: '#f4f6fb', card: '#ffffff', text: '#111827', muted: '#6b7280', line: '#e5e7eb', accent: '#1d4ed8', home: '#1d4ed8', draw: '#9ca3af', away: '#dc2626', good: '#15803d', bad: '#b91c1c', star: '#b45309', cl: '#0b1f4d' };
+    ? { bg: '#0b1020', card: '#141a2e', text: '#e5e7eb', muted: '#9aa3b5', line: '#26304a', accent: '#60a5fa', home: '#3b82f6', draw: '#6b7280', away: '#ef4444', good: '#4ade80', bad: '#f87171', star: '#fbbf24', cl: '#93c5fd', el: '#fb923c', ecl: '#4ade80' }
+    : { bg: '#f4f6fb', card: '#ffffff', text: '#111827', muted: '#6b7280', line: '#e5e7eb', accent: '#1d4ed8', home: '#1d4ed8', draw: '#9ca3af', away: '#dc2626', good: '#15803d', bad: '#b91c1c', star: '#b45309', cl: '#0b1f4d', el: '#c2410c', ecl: '#15803d' };
 }
 
 function Badge({ t }) {
@@ -182,7 +187,7 @@ function FixtureCard({ f, open, onToggle, c }) {
       );
   }
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }, f.comp === 'cl' && { borderLeftColor: c.cl, borderLeftWidth: 4 }]}>
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }, UEFA.includes(f.comp) && { borderLeftColor: c[f.comp], borderLeftWidth: 4 }]}>
       <View style={styles.meta}>
         <Text style={[styles.comp, { color: c.accent }]}>{f.compName}</Text>
         <Text style={[styles.small, { color: c.muted }]}>{when(f)}</Text>
@@ -222,7 +227,7 @@ function ResultCard({ r, c }) {
   const call = r.call;
   const pick = call ? (call.pickTeamId === r.home.id ? r.home.short : r.away.short) : '';
   return (
-    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }, r.comp === 'cl' && { borderLeftColor: c.cl, borderLeftWidth: 4 }]}>
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }, UEFA.includes(r.comp) && { borderLeftColor: c[r.comp], borderLeftWidth: 4 }]}>
       <View style={styles.meta}>
         <Text style={[styles.comp, { color: c.accent }]}>{r.compName}</Text>
         <Text style={[styles.small, { color: c.muted }]}>{when(r)}</Text>
@@ -277,7 +282,15 @@ function Record({ title, r, c }) {
 function ModelTab({ d, c }) {
   return (
     <ScrollView contentContainerStyle={styles.list}>
-      <Record title="Champions League" r={d.record.cl} c={c} />
+      {[
+        ['Champions League', d.record.cl],
+        ['Europa League', d.record.el],
+        ['Conference League', d.record.ecl],
+      ]
+        .filter(([, r]) => r && r.n > 0)
+        .map(([title, r]) => (
+          <Record key={title} title={title} r={r} c={c} />
+        ))}
       <Record title="All competitions" r={d.record.all} c={c} />
       {d.record.calibration.length ? (
         <View style={[styles.card, { backgroundColor: c.card, borderColor: c.line }]}>
@@ -323,6 +336,8 @@ function Main() {
   const [open, setOpen] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [updateReady, setUpdateReady] = useState(false);
+  const updateReadyRef = useRef(false);
   const dataRef = useRef(null);
 
   // Load saved state before the first real paint; nothing is written back until this has finished.
@@ -367,18 +382,39 @@ function Main() {
     }
   }, []);
 
+  // New app code published with EAS Update: downloaded in the background, applied on restart.
+  const checkForAppUpdate = useCallback(async () => {
+    if (__DEV__ || !Updates.isEnabled || updateReadyRef.current) return;
+    try {
+      const res = await Updates.checkForUpdateAsync();
+      if (!res.isAvailable) return;
+      const fetched = await Updates.fetchUpdateAsync();
+      if (!fetched.isNew) return;
+      updateReadyRef.current = true;
+      setUpdateReady(true);
+    } catch {
+      // Offline or no update server: try again next time.
+    }
+  }, []);
+
   useEffect(() => {
     if (!hydrated) return;
     refresh();
-    const timer = setInterval(refresh, POLL_MS);
+    checkForAppUpdate();
+    const timer = setInterval(() => {
+      refresh();
+      checkForAppUpdate();
+    }, POLL_MS);
     const sub = AppState.addEventListener('change', (s) => {
-      if (s === 'active') refresh();
+      if (s !== 'active') return;
+      refresh();
+      checkForAppUpdate();
     });
     return () => {
       clearInterval(timer);
       sub.remove();
     };
-  }, [hydrated, refresh]);
+  }, [hydrated, refresh, checkForAppUpdate]);
 
   const onPull = useCallback(async () => {
     setRefreshing(true);
@@ -390,7 +426,7 @@ function Main() {
     if (!data) return [];
     const m = new Map();
     for (const x of [...data.fixtures, ...data.results]) m.set(x.comp, x.compName);
-    return [...m].sort((a, b) => (a[0] === 'cl' ? -1 : b[0] === 'cl' ? 1 : a[1].localeCompare(b[1])));
+    return [...m].sort((a, b) => rank(a[0]) - rank(b[0]) || a[1].localeCompare(b[1]));
   }, [data]);
 
   if (!hydrated) {
@@ -416,6 +452,11 @@ function Main() {
       <View style={[styles.header, { backgroundColor: c.card, borderColor: c.line }]}>
         <Text style={[styles.title, { color: c.text }]}>UCL Match Model</Text>
         <Text style={[styles.small, { color: c.muted }]}>{status}</Text>
+        {updateReady ? (
+          <Pressable onPress={() => Updates.reloadAsync().catch(() => {})} style={[styles.update, { backgroundColor: c.accent }]} accessibilityRole="button">
+            <Text style={styles.updateText}>App update ready · tap to restart</Text>
+          </Pressable>
+        ) : null}
         <View style={styles.tabs}>
           {TABS.map(([key, label]) => (
             <Pressable key={key} onPress={() => setTab(key)} style={[styles.tab, tab === key && { borderBottomColor: c.accent }]} accessibilityRole="tab" accessibilityState={{ selected: tab === key }}>
@@ -478,6 +519,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 19, fontWeight: '800' },
   tabs: { flexDirection: 'row', marginTop: 6 },
   tab: { paddingVertical: 10, paddingHorizontal: 10, borderBottomWidth: 3, borderBottomColor: 'transparent' },
+  update: { marginTop: 6, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 12, alignSelf: 'flex-start' },
+  updateText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   chips: { flexGrow: 0 },
   chipsInner: { paddingHorizontal: 12, paddingVertical: 8, gap: 6 },
   chip: { borderWidth: 1, borderRadius: 999, paddingVertical: 6, paddingHorizontal: 12 },

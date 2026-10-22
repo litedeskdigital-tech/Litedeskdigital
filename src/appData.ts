@@ -5,9 +5,11 @@ import { compRates, strength, teamAt, type Params } from "./ratings";
 import type { Player } from "./scorers";
 import { getTeam } from "./teams";
 
-/** Display names of the competitions the app lists, Champions League first. */
+/** Display names of the competitions the app lists, UEFA's club competitions first. */
 export const COMP_NAMES: Record<string, string> = {
   cl: "Champions League",
+  el: "Europa League",
+  ecl: "Conference League",
   "en.1": "Premier League",
   "es.1": "LaLiga",
   "de.1": "Bundesliga",
@@ -22,7 +24,8 @@ export const COMP_NAMES: Record<string, string> = {
   "gr.1": "Greek Super League",
 };
 
-export const REFRESH_HOURS = 6;
+/** The model update runs every 30 minutes (.github/workflows/nightly.yml). */
+export const REFRESH_MINUTES = 30;
 const FIXTURE_HOURS = 48;
 const RESULT_HOURS = 24;
 
@@ -102,10 +105,13 @@ export type AppData = {
   tunedAt?: string;
   fixtures: AppFixture[];
   results: AppResult[];
-  record: { all: RecordSummary; cl: RecordSummary; calibration: { band: string; predicted: number; happened: number; n: number }[] };
+  record: { all: RecordSummary; cl: RecordSummary; el: RecordSummary; ecl: RecordSummary; calibration: { band: string; predicted: number; happened: number; n: number }[] };
   learning?: { at: string; kind: string; reason: string };
   leagues: { country: string; offset: number; sd: number }[];
 };
+
+/** Listing order: Champions League, Europa League, Conference League, then the domestic leagues. */
+const UEFA_ORDER = ["cl", "el", "ecl"];
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000;
 
@@ -177,7 +183,7 @@ export type AppInputs = {
 export function buildAppData({ matches, log, events, model, params, players, now }: AppInputs): AppData {
   const byMatch = new Map(log.map((p) => [p.matchId, p]));
   const shown = new Set(Object.keys(COMP_NAMES));
-  const order = (c: string) => (c === "cl" ? 0 : 1);
+  const order = (c: string) => UEFA_ORDER.indexOf(c) >>> 0;
   const sortKey = (m: Match) => m.kickoff ?? `${m.date}T${m.localTime ?? "12:00"}`;
 
   const fixtures: AppFixture[] = matches
@@ -287,7 +293,7 @@ export function buildAppData({ matches, log, events, model, params, players, now
 
   return {
     generatedAt: now,
-    nextRefresh: new Date(Date.parse(now) + REFRESH_HOURS * 3_600_000).toISOString(),
+    nextRefresh: new Date(Date.parse(now) + REFRESH_MINUTES * 60_000).toISOString(),
     ratingsAsOf: model.state.asOf,
     paramsVersion: params.version,
     tunedAt: params.tunedAt,
@@ -296,6 +302,8 @@ export function buildAppData({ matches, log, events, model, params, players, now
     record: {
       all: summarise(log),
       cl: summarise(log.filter((p) => p.comp === "cl")),
+      el: summarise(log.filter((p) => p.comp === "el")),
+      ecl: summarise(log.filter((p) => p.comp === "ecl")),
       calibration: bins
         .map((b, i) => ({ band: `${i * 20}–${i * 20 + 20}%`, predicted: b.n ? r3(b.p / b.n) : 0, happened: b.n ? r3(b.o / b.n) : 0, n: b.n }))
         .filter((b) => b.n > 0),

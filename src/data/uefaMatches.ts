@@ -5,9 +5,9 @@ import { LEAGUE_COUNTRY, matchId, type Match, type Score } from "./types";
 
 /**
  * UEFA's public match API (what uefa.com's fixture pages read): fixtures, kick-off dates and 90-minute scores
- * for UEFA club competitions. The Champions League main tournament gives the fixtures the model predicts; its
- * qualifiers, the Europa League and the Conference League are imported as played results only, because they are
- * the cross-border games that tie clubs from leagues without open data (Norway, Ukraine, …) to the rest.
+ * for UEFA club competitions. The main tournaments of the Champions League, Europa League and Conference League give
+ * the fixtures the model predicts; their qualifiers are imported as played results only. All of them are the
+ * cross-border games that tie clubs from leagues without open data (Norway, Ukraine, …) to the rest.
  */
 export const UEFA_MATCHES = "https://match.uefa.com/v5/matches";
 const PAGE = 200;

@@ -1,0 +1,55 @@
+name: Android app update (EAS Update)
+
+# Publishes the current mobile/ JavaScript as an over-the-air update to the "preview" channel, which the installed
+# APK (1.1.0 and later) downloads in the background and applies on restart. Only APKs with the same runtime
+# version (the app version in mobile/app.json) receive it: a change to native modules or app.json needs a new
+# APK instead (Android APK workflow, with the version bumped). Login as in the APK workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "What changed (shown on the EAS Update page)"
+        type: string
+        default: "App update"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_NO_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - name: Expo login (token, else device login)
+        uses: ./.github/actions/expo-login
+        with:
+          github-token: ${{ github.token }}
+      - name: Export gate
+        run: npx expo export --platform android 2>&1 | tee "$RUNNER_TEMP/export.log" && grep -q "Android Bundled" "$RUNNER_TEMP/export.log" && rm -rf dist
+      - name: Publish update
+        env:
+          MESSAGE: ${{ inputs.message }}
+        run: |
+          [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
+          npx -y eas-cli@latest update --channel preview --environment preview --platform android \
+            --message "$MESSAGE" --non-interactive --json > "$RUNNER_TEMP/update.json"
+          cat "$RUNNER_TEMP/update.json"
+          GROUP=$(node -p "const u=require(process.env.RUNNER_TEMP+'/update.json'); (Array.isArray(u)?u[0]:u).group")
+          echo "Update page: https://expo.dev/accounts/$(node -p "require('./app.json').expo.owner")/projects/$(node -p "require('./app.json').expo.slug")/updates/$GROUP"

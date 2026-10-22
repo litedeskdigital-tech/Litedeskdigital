@@ -1,7 +1,8 @@
 name: Android APK (EAS)
 
-# Builds the standalone Android APK of mobile/ on Expo EAS: links the project to the Expo account behind the
-# EXPO_TOKEN secret (once; the projectId is committed back), runs the Android export gate, builds the preview
+# Builds the standalone Android APK of mobile/ on Expo EAS: logs in with the EXPO_TOKEN secret if set, else with
+# Expo device login (approve the link in the log, then put the number Expo shows in match-<run id>.txt on the
+# expo-login branch), links the project to that account (once; the projectId is committed back), runs the Android export gate, builds the preview
 # profile (internal APK), waits for FINISHED, downloads the artifact, checks it is a real APK (ZIP magic "PK")
 # and attaches it to the run and to a GitHub release.
 on:
@@ -33,21 +34,21 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: mobile/package-lock.json
-      - name: Require EXPO_TOKEN
-        run: |
-          if [ -z "$EXPO_TOKEN" ]; then
-            echo "::error::Add an Expo access token as the repository secret EXPO_TOKEN (expo.dev > Account settings > Access tokens)."
-            exit 1
-          fi
       - run: npm ci
+      - name: Expo login (token, else device login)
+        uses: ./.github/actions/expo-login
+        with:
+          github-token: ${{ github.token }}
       - name: Expo account
         id: who
         run: |
+          [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
           ACCOUNT=$(npx -y eas-cli@latest whoami --non-interactive | head -1 | tr -d '[:space:]')
           echo "account=$ACCOUNT" >> "$GITHUB_OUTPUT"
           echo "Expo account: $ACCOUNT"
       - name: Link project (eas init) if needed
         run: |
+          [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
           if node -e "process.exit(require('./app.json').expo?.extra?.eas?.projectId ? 0 : 1)"; then
             echo "Already linked: $(node -p "require('./app.json').expo.extra.eas.projectId")"
           else
@@ -63,6 +64,7 @@ jobs:
       - name: Build (preview APK)
         id: build
         run: |
+          [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
           npx -y eas-cli@latest build --platform android --profile preview --non-interactive --no-wait --json \
             --message "UCL Match Model standalone APK" > "$RUNNER_TEMP/build.json"
           cat "$RUNNER_TEMP/build.json"
@@ -71,6 +73,7 @@ jobs:
       - name: Wait for FINISHED
         id: wait
         run: |
+          [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
           for i in $(seq 1 160); do
             npx -y eas-cli@latest build:view ${{ steps.build.outputs.id }} --json > "$RUNNER_TEMP/view.json" 2>/dev/null || true
             STATUS=$(node -p "try{JSON.parse(require('fs').readFileSync(process.env.RUNNER_TEMP+'/view.json','utf8')).status}catch{''}")

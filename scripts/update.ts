@@ -15,7 +15,7 @@ import { backtest, runCycle, type LearningEvent, type LoggedPrediction } from ".
 import { DEFAULT_PARAMS, type Params } from "../src/ratings";
 import { renderReport } from "../src/report";
 import { parsePlayersCsv } from "../src/scorers";
-import { buildPlayerSheet, fetchUefaSeason, mapTeams, playersToCsv, uefaFetcher, uefaSeasonYear, type SheetReport } from "../src/data/uefa";
+import { buildPlayerSheet, fetchUefaSeason, mapTeams, playersToCsv, uefaFetcher, uefaSeasonYear, type SheetReport, type UefaPlayer } from "../src/data/uefa";
 import { allTeams, getTeam } from "../src/teams";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -102,7 +102,7 @@ async function main(): Promise<void> {
   const countries = Object.fromEntries(allTeams().map((t) => [t.id, t.country]));
 
   const params = readJson<Params>(P.params, DEFAULT_PARAMS);
-  // Player sheet from UEFA's Champions League stats. A failed or skipped fetch keeps the last good sheet.
+  // Player sheet from UEFA's club-competition stats. A failed or skipped fetch keeps the last good sheet.
   let uefaNote = "";
   if (!offline && !process.argv.includes("--no-uefa")) {
     try {
@@ -124,8 +124,8 @@ async function main(): Promise<void> {
     forceTune: process.argv.includes("--retune"),
     now: arg("--today") ? `${today}T00:00:00Z` : new Date().toISOString(),
     players,
-    // UEFA's other competitions and CL qualifiers only feed the ratings.
-    predictComps: ["cl", ...DOMESTIC_LEAGUES],
+    // UEFA qualifiers (clq, and qualifying rows of el/ecl, which are imported played-only) only feed the ratings.
+    predictComps: [...UEFA_COMPETITIONS.map((c) => c.comp), ...DOMESTIC_LEAGUES],
   });
 
   writeRows(P.db, { updatedAt: today, teams }, "matches", matches);
@@ -148,9 +148,9 @@ async function main(): Promise<void> {
 }
 
 /**
- * Imports UEFA club-competition matches. The Champions League main tournament is taken (fixtures included) for
- * seasons openfootball has not published; CL qualifiers, Europa League and Conference League are taken as played
- * results for every season. Finished past seasons already in the database are not fetched again.
+ * Imports UEFA club-competition matches. The Europa League and Conference League main tournaments are taken with
+ * fixtures for every season, the Champions League's for seasons openfootball has not published; qualifiers are
+ * taken as played results. Finished past seasons already in the database are not fetched again.
  */
 async function importUefaMatches(
   today: string,
@@ -171,9 +171,9 @@ async function importUefaMatches(
       if (done) continue;
       const rows = await fetchUefaMatches(c.id, uefaSeasonYear(season), uefaFetcher);
       const keep = c.comp === "cl" && !wantTournament ? rows.filter((r) => r.round?.phase === "QUALIFYING") : rows;
-      // Only the Champions League main tournament contributes fixtures to predict; everything else, results only.
-      const tournament = keep.filter((r) => c.comp === "cl" && r.round?.phase !== "QUALIFYING");
-      const rest = keep.filter((r) => !(c.comp === "cl" && r.round?.phase !== "QUALIFYING"));
+      // Main tournaments contribute fixtures to predict; qualifiers, results only.
+      const tournament = keep.filter((r) => r.round?.phase !== "QUALIFYING");
+      const rest = keep.filter((r) => r.round?.phase === "QUALIFYING");
       for (const [part, playedOnly] of [[tournament, false], [rest, true]] as const) {
         const { matches: ms, report } = toMatches(part, c, season, aliases, playedOnly, clClubs);
         matches.push(...ms);
@@ -191,13 +191,23 @@ async function importUefaMatches(
   };
 }
 
-/** Fetches this and last season's UEFA Champions League player stats and writes data/players.csv. */
+/**
+ * Fetches this and last season's player stats for the three UEFA club competitions and writes data/players.csv.
+ * A player listed twice in a season (moved clubs between competitions) keeps the row with the most minutes.
+ */
 async function importUefaPlayers(today: string, matches: { comp: string; home: string; away: string }[]): Promise<string> {
   const season = seasonsUpTo(today).at(-1)!;
   const year = uefaSeasonYear(season);
-  const current = await fetchUefaSeason(year, uefaFetcher);
-  if (!current) return `UEFA player stats: none published yet for ${season}`;
-  const previous = (await fetchUefaSeason(year - 1, uefaFetcher)) ?? [];
+  const fetchAll = async (y: number) => {
+    const rows: UefaPlayer[] = [];
+    for (const c of UEFA_COMPETITIONS) rows.push(...((await fetchUefaSeason(y, uefaFetcher, c.id)) ?? []));
+    const best = new Map<string, UefaPlayer>();
+    for (const p of rows) if ((best.get(p.playerId)?.minutes ?? -1) < p.minutes) best.set(p.playerId, p);
+    return [...best.values()];
+  };
+  const current = await fetchAll(year);
+  if (!current.length) return `UEFA player stats: none published yet for ${season}`;
+  const previous = await fetchAll(year - 1);
   const inCl = new Set(matches.filter((m) => m.comp === "cl").flatMap((m) => [m.home, m.away]));
   const ours = allTeams().map((t) => ({ id: t.id, name: t.name, country: t.country, inCl: inCl.has(t.id) }));
   const aliases = readJson<Record<string, string>>(P.uefaAliases, {});

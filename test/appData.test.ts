@@ -31,7 +31,7 @@ describe("app data feed", () => {
     expect(d.results[0]!.score).toEqual({ home: 2, away: 1 });
   });
 
-  it("schedules the next refresh six hours on", () => {
-    expect(d.nextRefresh).toBe("2026-03-05T18:00:00.000Z");
+  it("schedules the next refresh 30 minutes on", () => {
+    expect(d.nextRefresh).toBe("2026-03-05T12:30:00.000Z");
   });
 });

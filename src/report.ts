@@ -60,7 +60,10 @@ function wf(w: WalkForward): string {
   return `all ${w.all.n} matches log loss ${f3(w.all.logLoss)}, accuracy ${pct(w.all.accuracy)}; Champions League ${w.cl.n} matches log loss ${f3(w.cl.logLoss)}, accuracy ${pct(w.cl.accuracy)}`;
 }
 
-/** Scenario view for Champions League fixtures: how the 5,000 simulated games unfold. */
+const UEFA = ["cl", "el", "ecl"];
+const UEFA_NAMES: Record<string, string> = { cl: "Champions League", el: "Europa League", ecl: "Conference League" };
+
+/** Scenario view for UEFA club-competition fixtures: how the 5,000 simulated games unfold. */
 function scenarioTable(preds: CycleOutput["upcoming"]): string {
   if (!preds.length) return "";
   const rows = preds.map((p) => {
@@ -71,7 +74,7 @@ function scenarioTable(preds: CycleOutput["upcoming"]): string {
     return `| ${p.homeShort} v ${p.awayShort} | ${pct(s.firstGoal.home)} / ${pct(s.firstGoal.none)} / ${pct(s.firstGoal.away)} | ${fav}: ${pct(f.winsIfConcedesFirst)} | ${pct(f.trailsAtSomePoint)} / ${pct(f.trailsByTwo)} | ${pct(f.dropsLead)} | ${s.htft[0]!.key} ${pct(s.htft[0]!.p)}, ${s.htft[1]!.key} ${pct(s.htft[1]!.p)} | ${pct(s.lateWinner)} | ${blocks} |`;
   });
   return [
-    "### Champions League scenarios (5,000 minute-by-minute simulations each)",
+    "### UEFA club-competition scenarios (5,000 minute-by-minute simulations each)",
     "",
     "| Match | First goal H / none / A | Favourite wins after conceding first | Favourite trails / trails by 2 | Favourite drops a lead | Likeliest HT/FT | Late winner (level at 75') | Goal in each 15' block |",
     "|---|---|---|---|---|---|---|---|",
@@ -81,7 +84,6 @@ function scenarioTable(preds: CycleOutput["upcoming"]): string {
 
 export function renderReport(out: CycleOutput, today: string, backtest: WalkForward, params: Params, sources: string[]): string {
   const scored = out.log.filter((p) => p.logLoss !== undefined);
-  const clScored = scored.filter((p) => p.comp === "cl");
   const misses = scored.filter((p) => p.miss).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 12);
   const cl = compRates(out.state, "cl", today, params);
   const top = Object.entries(out.state.teams)
@@ -89,7 +91,9 @@ export function renderReport(out: CycleOutput, today: string, backtest: WalkForw
     .map(([id, t]) => ({ id, s: strength(out.state, id, cl.mu), sd: Math.sqrt((t.attack.v + t.defence.v) / 2 + (out.state.leagues[t.country]?.v ?? 0)) }))
     .sort((a, b) => b.s - a.s)
     .slice(0, 20);
-  const upcoming = [...out.upcoming].sort((a, b) => (a.comp === "cl" ? -1 : 0) - (b.comp === "cl" ? -1 : 0) || (a.date < b.date ? -1 : 1));
+  const rank = (c: string) => UEFA.indexOf(c) >>> 0;
+  const upcoming = [...out.upcoming].sort((a, b) => rank(a.comp) - rank(b.comp) || (a.date < b.date ? -1 : 1));
+  const byComp = UEFA.map((c) => [UEFA_NAMES[c]!, scored.filter((p) => p.comp === c)] as const).filter(([, ps]) => ps.length > 0);
   const lastEvent = [...out.events].reverse().find((e) => e.kind !== "drift-check");
 
   return `# Model report
@@ -102,9 +106,7 @@ Sources: ${sources.join(", ")}.
 
 ${summary(scored)}
 
-Champions League only:
-
-${summary(clScored)}
+${byComp.map(([n, ps]) => `${n} only:\n\n${summary(ps)}`).join("\n\n")}
 
 ${calibration(scored)}
 
@@ -125,7 +127,7 @@ ${misses.length ? misses.map((p) => `- ${p.date} ${name(p.home)} v ${name(p.away
 
 ${upcoming.length ? ["| Date | Comp | Match | H / D / A | Pick | Margin | Score | Bonus scorer |", "|---|---|---|---|---|---|---|---|", ...upcoming.map((p) => `| ${p.date} | ${p.comp} | ${p.homeShort} v ${p.awayShort} | ${pct(p.fullTime.home)} / ${pct(p.fullTime.draw)} / ${pct(p.fullTime.away)} | ${name(p.winner.teamId)} ${pct(p.winner.pWin)} (${pct(p.winner.pWinCi[0])}–${pct(p.winner.pWinCi[1])})${p.winner.isHighProbability ? " ★" : ""} | ${p.mostLikelyMargin.label} | ${p.mostLikelyScore} | ${p.bonusScorer ? `${p.bonusScorer.name} ${pct(p.bonusScorer.pAnytime)}` : "–"} |`)].join("\n") : "No fixtures in the horizon."}
 
-${scenarioTable(upcoming.filter((p) => p.comp === "cl"))}
+${scenarioTable(upcoming.filter((p) => UEFA.includes(p.comp)))}
 
 ★ = high-probability pick (≥60% and the low end of its range ≥45%).
 
