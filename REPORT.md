@@ -139,7 +139,7 @@ all 9946 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 | 2026-10-25 | nl.1 | Fortuna Sittard v SBV Excelsior | 40% / 23% / 37% | Fortuna Sittard 40% (27%–54%) | Draw | 1–1 | – |
 | 2026-10-25 | nl.1 | NEC v Groningen | 52% / 21% / 27% | NEC 52% (38%–66%) | NEC by 1 | 2–1 | Tjaronn Chery 34% |
 | 2026-10-25 | nl.1 | PSV v Feyenoord | 61% / 17% / 22% | PSV 61% (47%–74%) ★ | PSV by 3+ | 2–1 | Ivan Perišić 25% |
-| 2026-10-25 | nl.1 | Sparta Rotterdam v Ajax | 24% / 20% / 56% | Ajax 56% (43%–71%) | Ajax by 1 | 1–2 | Toluwalase Arokodare 24% |
+| 2026-10-25 | nl.1 | Sparta Rotterdam v Ajax | 24% / 20% / 56% | Ajax 56% (43%–71%) | Ajax by 1 | 1–2 | Tolu Arokodare 24% |
 | 2026-10-25 | pt.1 | Nacional v Sporting Clube | 21% / 23% / 56% | Sporting Clube 56% (44%–70%) | Sporting Clube by 1 | 0–1 | Ricardo Horta 32% |
 | 2026-10-25 | pt.1 | GD Estoril v Moreirense | 48% / 23% / 29% | GD Estoril 48% (35%–62%) | Draw | 1–1 | – |
 | 2026-10-25 | pt.1 | Rio Ave v Famalicão | 26% / 26% / 48% | Famalicão 48% (36%–62%) | Draw | 0–1 | – |
@@ -180,7 +180,7 @@ all 9946 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 | 2026-10-31 | it.1 | Milan v Inter | 29% / 23% / 48% | Inter 48% (35%–62%) | Draw | 1–1 | Lautaro Martínez 28% |
 | 2026-10-31 | it.1 | Bologna v Monza | 63% / 21% / 16% | Bologna 63% (50%–77%) ★ | Bologna by 1 | 1–0 | – |
 | 2026-10-31 | it.1 | Udinese Calcio v Roma | 20% / 23% / 57% | Roma 57% (44%–71%) | Roma by 1 | 0–1 | Donyell Malen 39% |
-| 2026-10-31 | nl.1 | Ajax v AZ | 50% / 21% / 30% | Ajax 50% (37%–63%) | Ajax by 1 | 2–1 | Toluwalase Arokodare 23% |
+| 2026-10-31 | nl.1 | Ajax v AZ | 50% / 21% / 30% | Ajax 50% (37%–63%) | Ajax by 1 | 2–1 | Tolu Arokodare 23% |
 | 2026-10-31 | nl.1 | Feyenoord v Fortuna Sittard | 76% / 14% / 10% | Feyenoord 76% (65%–87%) ★ | Feyenoord by 3+ | 2–0 | Anis Hadj Moussa 32% |
 | 2026-10-31 | nl.1 | PSV v Willem II | 93% / 5% / 3% | PSV 93% (85%–98%) ★ | PSV by 3+ | 4–0 | Ivan Perišić 38% |
 | 2026-10-31 | nl.1 | Cambuur-Leeuwarden v Go Ahead | 23% / 18% / 59% | Go Ahead 59% (38%–81%) | Go Ahead by 3+ | 1–2 | – |
