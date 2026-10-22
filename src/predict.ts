@@ -16,6 +16,7 @@ import { compRates, viewMatch, type Params, type State } from "./ratings";
 import { simulateScenarios, type ScenarioReport } from "./simulate";
 import { anytimeScorers, type Player, type ScorerProb } from "./scorers";
 import { getTeam, type Stage, type Team } from "./teams";
+import { applyNews, newsSentence, type MatchNews, type NewsSummary } from "./teamNews";
 
 /** A fitted model: the rating state after every result so far, the settings that produced it, club countries. */
 export type Model = { state: State; params: Params; countries: Record<string, string> };
@@ -32,6 +33,8 @@ export type PredictInput = {
   players?: Player[];
   /** Fixes the posterior draws so a run can be reproduced. */
   seed?: number;
+  /** Team news (missing players, confirmed lineups): attack shifts and minutes for the scorer pick. See teamNews.ts. */
+  news?: MatchNews;
 };
 
 export type Prediction = {
@@ -78,6 +81,8 @@ export type Prediction = {
   pHomeAdvance?: number;
   /** 5,000 minute-by-minute simulations: first goal, game flow, the favourite's bad scenarios. */
   scenarios: ScenarioReport;
+  /** What team news changed, when there was any. */
+  teamNews?: NewsSummary;
   /** Highest anytime-scorer chance across both sheets; absent when no player data was given. */
   bonusScorer?: ScorerProb;
   /** Top anytime scorers across both clubs, most likely first. */
@@ -180,7 +185,16 @@ export function generatePrediction(input: PredictInput): Prediction {
   const home = getTeam(match.home);
   const away = getTeam(match.away);
   const neutral = match.neutral ?? false;
-  const view = viewMatch(model.state, match, model.countries, model.params);
+  const news = input.news;
+  const base = viewMatch(model.state, match, model.countries, model.params);
+  // Missing attackers lower a side's attack for this match only; the stored ratings are untouched.
+  const view = news
+    ? {
+        ...base,
+        home: { ...base.home, attack: { ...base.home.attack, m: base.home.attack.m + news.homeAttack } },
+        away: { ...base.away, attack: { ...base.away.attack, m: base.away.attack.m + news.awayAttack } },
+      }
+    : base;
   const rates = compRates(model.state, match.comp, match.date, model.params);
   const sim = simulateMatch({
     view,
@@ -201,7 +215,7 @@ export function generatePrediction(input: PredictInput): Prediction {
   const best = scores[0]!;
   const goals = goalsMarkets(sim.grid);
 
-  const players = input.players ?? [];
+  const players = news ? applyNews(input.players ?? [], news) : (input.players ?? []);
   const homePlayers = players.filter((p) => p.teamId === home.id);
   const awayPlayers = players.filter((p) => p.teamId === away.id);
   const scorers = [
@@ -267,6 +281,14 @@ export function generatePrediction(input: PredictInput): Prediction {
     pBtts: round3(goals.pBtts),
     pHomeAdvance,
     scenarios,
+    teamNews: news && {
+      homeOut: news.homeOut,
+      awayOut: news.awayOut,
+      homeAttack: round3(news.homeAttack),
+      awayAttack: round3(news.awayAttack),
+      lineups: news.lineups,
+      at: news.at,
+    },
     bonusScorer: scorers[0],
     anytimeScorers: scorers,
     scorerNote,
@@ -277,7 +299,8 @@ export function generatePrediction(input: PredictInput): Prediction {
     timestamp: formatTimestamp(new Date()),
     commentary:
       buildCommentary(home, away, ft, winner, likelyBand, pHomeAdvance, scorers[0], neutral) +
-      scenarioSentence(winner.side === "home" ? home : away, scenarios),
+      scenarioSentence(winner.side === "home" ? home : away, scenarios) +
+      (news ? newsSentence(home.name, away.name, news) : ""),
     formNote: FORM_NOTE,
     sourceNote: input.sourceNote ?? "",
     nSamples: N_SAMPLES,

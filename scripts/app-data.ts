@@ -10,6 +10,7 @@ import { hydrateTeams, type Db } from "../src/data/db";
 import type { LearningEvent, LoggedPrediction } from "../src/learn";
 import type { Params, State } from "../src/ratings";
 import { parsePlayersCsv } from "../src/scorers";
+import type { MatchNews } from "../src/teamNews";
 
 const ROOT = join(import.meta.dirname, "..");
 const read = <T>(p: string): T => JSON.parse(readFileSync(join(ROOT, p), "utf8")) as T;
@@ -22,6 +23,7 @@ hydrateTeams(db);
 const countries = Object.fromEntries(Object.entries(db.teams).map(([id, t]) => [id, t.country]));
 const params = read<Params>("model/params.json");
 const playersPath = join(ROOT, "data/players.csv");
+const newsPath = join(ROOT, "data/team-news.json");
 const data = buildAppData({
   matches: db.matches,
   log: read<{ predictions: LoggedPrediction[] }>("data/predictions.json").predictions,
@@ -29,6 +31,7 @@ const data = buildAppData({
   model: { state: read<State>("model/state.json"), params, countries },
   params,
   players: existsSync(playersPath) ? parsePlayersCsv(readFileSync(playersPath, "utf8")) : undefined,
+  news: existsSync(newsPath) ? (JSON.parse(readFileSync(newsPath, "utf8")) as { matches: Record<string, MatchNews> }).matches : undefined,
   now,
 });
 const out = join(ROOT, "app/public/data/app.json");

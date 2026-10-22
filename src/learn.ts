@@ -5,6 +5,7 @@ import type { Player } from "./scorers";
 import { runFilter, viewMatch, type Params, type State } from "./ratings";
 import { getTeam } from "./teams";
 import { outcomeOf, tune, walkForward, type Outcome, type WalkForward } from "./tune";
+import type { MatchNews } from "./teamNews";
 
 /**
  * The learning loop. Every upcoming fixture is predicted once and the prediction is frozen in the log before the
@@ -241,6 +242,8 @@ export type CycleInput = {
   predictComps?: string[];
   /** Current time (ISO UTC); decides which fixtures are still before kick-off. Defaults to the start of `today`. */
   now?: string;
+  /** Team news by match id (data/team-news.json). */
+  news?: Record<string, MatchNews>;
 };
 
 export type CycleOutput = {
@@ -360,7 +363,7 @@ export function runCycle(input: CycleInput): CycleOutput {
     if (input.predictComps && !input.predictComps.includes(m.comp)) continue;
     const firstLeg = m.leg === 2 ? matches.find((x) => x.leg === 1 && x.stage === m.stage && x.season === m.season && x.home === m.away && x.away === m.home)?.ft : undefined;
     if (m.leg === 2 && !firstLeg) continue;
-    const pred = generatePrediction({ match: m, model, firstLeg, players: input.players, seed: 1 });
+    const pred = generatePrediction({ match: m, model, firstLeg, players: input.players, news: input.news?.[m.id], seed: 1 });
     upcoming.push(pred);
     const i = byMatch.get(m.id);
     if (i === undefined) {

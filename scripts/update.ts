@@ -17,6 +17,10 @@ import { renderReport } from "../src/report";
 import { parsePlayersCsv } from "../src/scorers";
 import { buildPlayerSheet, fetchUefaSeason, mapTeams, playersToCsv, uefaFetcher, uefaSeasonYear, type SheetReport, type UefaPlayer } from "../src/data/uefa";
 import { allTeams, getTeam } from "../src/teams";
+import { emptyStore, marketSummary, newsFromStore, srConfigFromEnv, syncSportradar } from "../src/data/sportradar";
+import { openStore, sealStore } from "./sportradar-store";
+import type { MatchNews } from "../src/teamNews";
+import { outcomeOf } from "../src/tune";
 
 const ROOT = join(import.meta.dirname, "..");
 const P = {
@@ -31,6 +35,9 @@ const P = {
   uefaTeams: join(ROOT, "data/uefa-teams.json"),
   uefaAliases: join(ROOT, "data/manual/uefa-team-aliases.json"),
   uefaImport: join(ROOT, "data/uefa-import.json"),
+  news: join(ROOT, "data/team-news.json"),
+  // Licensed Sportradar data: kept in the Actions cache, never committed (see src/data/sportradar.ts).
+  srStore: process.env.SPORTRADAR_STORE ?? join(ROOT, ".cache/sportradar/store.enc"),
 };
 
 function arg(name: string): string | undefined {
@@ -113,8 +120,31 @@ async function main(): Promise<void> {
     }
   }
   const players = existsSync(P.players) ? parsePlayersCsv(readFileSync(P.players, "utf8")) : undefined;
+  const now = arg("--today") ? `${today}T00:00:00Z` : new Date().toISOString();
+
+  // Sportradar (only with keys): team news for the next 48 hours, xG for learning, odds for the market check.
+  const srCfg = srConfigFromEnv(process.env);
+  const srSecret = srCfg.soccerKey ?? srCfg.oddsKey ?? "";
+  const notes: string[] = [];
+  let sr = emptyStore();
+  if (srSecret && existsSync(P.srStore)) {
+    const opened = openStore(readFileSync(P.srStore, "utf8"), srSecret);
+    if (opened) sr = opened;
+    else notes.push("Sportradar store could not be opened (key changed?); started a fresh one");
+  }
+  let news: Record<string, MatchNews> = {};
+  if (!offline && (srCfg.soccerKey || srCfg.oddsKey)) {
+    const res = await syncSportradar(sr, matches, srCfg, now);
+    news = newsFromStore(sr, matches, players ?? [], now, new Date(Date.parse(now) + 48 * 3_600_000).toISOString());
+    const used = (k: "soccer" | "odds") => sr.calls[k].filter((c) => Date.parse(now) - Date.parse(c) < 30 * 86_400_000).length;
+    notes.push(
+      `Sportradar: ${res.calls.soccer + res.calls.odds} calls this run (30-day use: soccer ${used("soccer")}, odds ${used("odds")} of ${srCfg.monthlyCap}); team news for ${Object.keys(news).length} matches, xG for ${Object.values(sr.xg).filter(Boolean).length} matches${res.notes.length ? `; ${res.notes.slice(0, 3).join("; ")}` : ""}`,
+    );
+  }
+  // xG joins the matches in memory only: data/matches.json stays free of licensed data.
+  const learnFrom = matches.map((m) => (sr.xg[m.id] ? { ...m, xg: sr.xg[m.id]! } : m));
   const out = runCycle({
-    matches,
+    matches: learnFrom,
     countries,
     params,
     log: readJson<{ predictions: LoggedPrediction[] }>(P.log, { predictions: [] }).predictions,
@@ -122,8 +152,9 @@ async function main(): Promise<void> {
     today,
     noTune: process.argv.includes("--no-tune"),
     forceTune: process.argv.includes("--retune"),
-    now: arg("--today") ? `${today}T00:00:00Z` : new Date().toISOString(),
+    now,
     players,
+    news,
     // UEFA qualifiers (clq, and qualifying rows of el/ecl, which are imported played-only) only feed the ratings.
     predictComps: [...UEFA_COMPETITIONS.map((c) => c.comp), ...DOMESTIC_LEAGUES],
   });
@@ -139,7 +170,23 @@ async function main(): Promise<void> {
     ...(uefaMatchNote ? [uefaMatchNote] : []),
     ...(uefaNote ? [uefaNote] : []),
   ];
-  writeFileSync(P.report, renderReport(out, today, backtest(matches, countries, out.params), out.params, sources));
+  // Market check: the model's last pre-match call against the bookmaker consensus, per scored match.
+  for (const p of out.log) {
+    const mk = sr.market[p.matchId];
+    if (!p.result || !mk || sr.marketScores[p.matchId]) continue;
+    const o = outcomeOf(p.result);
+    const model = p.latest ?? p;
+    const ll = (x: { home: number; draw: number; away: number }) => Math.round(-Math.log(Math.max(1e-9, x[o])) * 1000) / 1000;
+    sr.marketScores[p.matchId] = { model: ll({ home: model.pHome, draw: model.pDraw, away: model.pAway }), market: ll(mk) };
+  }
+  const market = marketSummary(sr);
+  if (market) notes.push(market);
+  if (srCfg.soccerKey || srCfg.oddsKey) {
+    mkdirSync(join(P.srStore, ".."), { recursive: true });
+    writeFileSync(P.srStore, sealStore(sr, srSecret));
+    writeJson(P.news, { updatedAt: now, matches: news });
+  }
+  writeFileSync(P.report, renderReport(out, today, backtest(learnFrom, countries, out.params), out.params, sources, notes));
 
   const played = matches.filter((m) => m.ft).length;
   console.log(

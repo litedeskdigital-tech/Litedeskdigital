@@ -82,7 +82,7 @@ function scenarioTable(preds: CycleOutput["upcoming"]): string {
   ].join("\n");
 }
 
-export function renderReport(out: CycleOutput, today: string, backtest: WalkForward, params: Params, sources: string[]): string {
+export function renderReport(out: CycleOutput, today: string, backtest: WalkForward, params: Params, sources: string[], notes: string[] = []): string {
   const scored = out.log.filter((p) => p.logLoss !== undefined);
   const misses = scored.filter((p) => p.miss).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 12);
   const cl = compRates(out.state, "cl", today, params);
@@ -101,7 +101,7 @@ export function renderReport(out: CycleOutput, today: string, backtest: WalkForw
 Generated ${today}. Ratings include results up to ${out.state.asOf}. Parameter set v${params.version}${params.tunedAt ? ` (tuned ${params.tunedAt})` : ""}.
 
 Sources: ${sources.join(", ")}.
-
+${notes.length ? `\n${notes.map((n) => `- ${n}`).join("\n")}\n` : ""}
 ## Live record (predictions frozen before kick-off)
 
 ${summary(scored)}

@@ -3,6 +3,7 @@ import { beforeKickoff, type LoggedPrediction, type LearningEvent } from "./lear
 import { generatePrediction, type Model, type Prediction } from "./predict";
 import { compRates, strength, teamAt, type Params } from "./ratings";
 import type { Player } from "./scorers";
+import type { MatchNews } from "./teamNews";
 import { getTeam } from "./teams";
 
 /** Display names of the competitions the app lists, UEFA's club competitions first. */
@@ -77,6 +78,7 @@ export type AppFixture = {
     | "scenarios"
     | "bonusScorer"
     | "anytimeScorers"
+    | "teamNews"
     | "commentary"
     | "confidence"
   >;
@@ -176,11 +178,13 @@ export type AppInputs = {
   model: Model;
   params: Params;
   players?: Player[];
+  /** Team news by match id (data/team-news.json). */
+  news?: Record<string, MatchNews>;
   now: string;
 };
 
 /** Everything the app shows, from the committed model files. Fixture predictions are recomputed from the current state. */
-export function buildAppData({ matches, log, events, model, params, players, now }: AppInputs): AppData {
+export function buildAppData({ matches, log, events, model, params, players, news, now }: AppInputs): AppData {
   const byMatch = new Map(log.map((p) => [p.matchId, p]));
   const shown = new Set(Object.keys(COMP_NAMES));
   const order = (c: string) => UEFA_ORDER.indexOf(c) >>> 0;
@@ -195,7 +199,7 @@ export function buildAppData({ matches, log, events, model, params, players, now
           ? matches.find((x) => x.leg === 1 && x.stage === m.stage && x.season === m.season && x.home === m.away && x.away === m.home)?.ft
           : undefined;
       if (m.leg === 2 && !firstLeg) return [];
-      const p = generatePrediction({ match: m, model, firstLeg, players, seed: 1 });
+      const p = generatePrediction({ match: m, model, firstLeg, players, news: news?.[m.id], seed: 1 });
       const mu = compRates(model.state, m.comp, m.date, params).mu;
       const logged = byMatch.get(m.id);
       return [
@@ -233,6 +237,7 @@ export function buildAppData({ matches, log, events, model, params, players, now
             pBtts: p.pBtts,
             pHomeAdvance: p.pHomeAdvance,
             scenarios: p.scenarios,
+            teamNews: p.teamNews,
             bonusScorer: p.bonusScorer,
             anytimeScorers: p.anytimeScorers.slice(0, 4),
             commentary: p.commentary,
