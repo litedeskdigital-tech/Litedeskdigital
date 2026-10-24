@@ -1,6 +1,6 @@
 # Model report
 
-Generated 2026-10-23. Ratings include results up to 2026-10-22. Parameter set v3 (tuned 2026-10-21).
+Generated 2026-10-24. Ratings include results up to 2026-10-22. Parameter set v3 (tuned 2026-10-21).
 
 Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1861 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
@@ -64,12 +64,15 @@ all 9981 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 
 | Date | Comp | Match | H / D / A | Pick | Margin | Score | Bonus scorer |
 |---|---|---|---|---|---|---|---|
-| 2026-10-23 | de.1 | Stuttgart v Borussia Mönchengladbach | 67% / 16% / 17% | Stuttgart 67% (54%–79%) ★ | Stuttgart by 3+ | 2–1 | Deniz Undav 36% |
-| 2026-10-23 | en.1 | Ipswich Town v Nottingham Forest | 23% / 23% / 54% | Nottingham Forest 54% (39%–70%) | Nottingham Forest by 1 | 0–1 | – |
-| 2026-10-23 | fr.1 | Stade Brestois v OGC Nice | 48% / 24% / 29% | Stade Brestois 48% (35%–61%) | Draw | 1–1 | – |
-| 2026-10-23 | it.1 | Torino v Monza | 53% / 23% / 23% | Torino 53% (39%–68%) | Torino by 1 | 1–0 | – |
-| 2026-10-23 | nl.1 | Go Ahead v Telstar | 55% / 21% / 24% | Go Ahead 55% (40%–69%) | Go Ahead by 1 | 1–1 | – |
-| 2026-10-23 | pt.1 | Vitória Guimarães v CS Marítimo | 59% / 21% / 20% | Vitória Guimarães 59% (40%–79%) | Vitória Guimarães by 1 | 1–0 | – |
+| 2026-11-03 | cl | Atlético v Bayern | 37% / 19% / 44% | Bayern 44% (29%–61%) | Draw | 1–2 | Harry Kane 41% |
+| 2026-11-03 | cl | Barça v Villa | 64% / 16% / 20% | Barça 64% (49%–79%) ★ | Barça by 3+ | 2–1 | Anthony Gordon 38% |
+| 2026-11-03 | cl | Feyenoord v Inter | 28% / 19% / 54% | Inter 54% (38%–71%) | Inter by 1 | 1–2 | Lautaro Martínez 25% |
+| 2026-11-03 | cl | Bodø/Glimt v Lille | 56% / 20% / 25% | Bodø/Glimt 56% (39%–72%) | Bodø/Glimt by 1 | 2–1 | Sondre Brunstad Fet 29% |
+| 2026-11-03 | cl | Shakhtar Donetsk v Sporting | 26% / 20% / 54% | Sporting 54% (36%–73%) | Sporting by 1 | 1–2 | Luis Suárez 37% |
+| 2026-11-03 | cl | Galatasaray v Stuttgart | 48% / 20% / 33% | Galatasaray 48% (32%–65%) | Draw | 2–1 | Victor Osimhen 35% |
+| 2026-11-03 | cl | LASK v ŠK Slovan | 56% / 20% / 24% | LASK 56% (38%–75%) | LASK by 1 | 2–1 | Suleiman Camara 26% |
+| 2026-11-03 | cl | Man Utd v Roma | 54% / 20% / 26% | Man Utd 54% (39%–69%) | Man Utd by 1 | 2–1 | Donyell Malen 28% |
+| 2026-11-03 | cl | Villarreal v PSG | 30% / 18% / 52% | PSG 52% (36%–69%) | PSG by 1 | 1–2 | Ousmane Dembélé 41% |
 | 2026-10-24 | de.1 | Köln v Schalke | 46% / 24% / 30% | Köln 46% (26%–67%) | Draw | 1–0 | – |
 | 2026-10-24 | de.1 | FSV Mainz v Werder Bremen | 52% / 23% / 26% | FSV Mainz 52% (39%–65%) | FSV Mainz by 1 | 1–1 | – |
 | 2026-10-24 | de.1 | Dortmund v Eintracht Frankfurt | 67% / 16% / 17% | Dortmund 67% (54%–79%) ★ | Dortmund by 3+ | 2–1 | Serhou Guirassy 57% |
@@ -207,7 +210,19 @@ all 9981 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 | 2026-11-02 | pt.1 | Gil Vicente v Vitória Guimarães | 40% / 27% / 33% | Gil Vicente 40% (29%–53%) | Draw | 1–0 | – |
 | 2026-11-02 | pt.1 | Sport Lisboa v Alverca | 84% / 11% / 6% | Sport Lisboa 84% (74%–92%) ★ | Sport Lisboa by 3+ | 2–0 | Jhon Durán 43% |
 
+### UEFA club-competition scenarios (5,000 minute-by-minute simulations each)
 
+| Match | First goal H / none / A | Favourite wins after conceding first | Favourite trails / trails by 2 | Favourite drops a lead | Likeliest HT/FT | Late winner (level at 75') | Goal in each 15' block |
+|---|---|---|---|---|---|---|---|
+| Atlético v Bayern | 47% / 2% / 51% | Bayern: 21% | 59% / 29% | 21% | A/A 27%, H/H 22% | 12% | 44% 48% 49% 49% 54% 58% |
+| Barça v Villa | 63% / 1% / 36% | Barça: 38% | 45% / 17% | 17% | H/H 42%, D/H 15% | 12% | 47% 50% 52% 52% 57% 61% |
+| Feyenoord v Inter | 40% / 2% / 58% | Inter: 28% | 50% / 21% | 19% | A/A 35%, H/H 15% | 12% | 43% 47% 48% 48% 53% 57% |
+| Bodø/Glimt v Lille | 59% / 3% / 38% | Bodø/Glimt: 26% | 45% / 16% | 16% | H/H 34%, D/H 17% | 12% | 38% 42% 42% 43% 47% 51% |
+| Shakhtar Donetsk v Sporting | 39% / 4% / 58% | Sporting: 24% | 46% / 18% | 16% | A/A 34%, D/A 15% | 11% | 38% 42% 42% 43% 47% 51% |
+| Galatasaray v Stuttgart | 54% / 2% / 44% | Galatasaray: 23% | 55% / 25% | 21% | H/H 29%, A/A 19% | 12% | 43% 46% 47% 47% 52% 56% |
+| LASK v ŠK Slovan | 59% / 4% / 37% | LASK: 24% | 44% / 15% | 15% | H/H 35%, D/H 17% | 12% | 38% 41% 42% 42% 46% 50% |
+| Man Utd v Roma | 58% / 3% / 38% | Man Utd: 25% | 46% / 17% | 16% | H/H 33%, D/H 16% | 12% | 39% 42% 43% 43% 47% 52% |
+| Villarreal v PSG | 43% / 1% / 56% | PSG: 28% | 54% / 24% | 20% | A/A 34%, H/H 17% | 12% | 46% 49% 51% 51% 56% 60% |
 
 ★ = high-probability pick (≥60% and the low end of its range ≥45%).
 
