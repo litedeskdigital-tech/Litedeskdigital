@@ -82,6 +82,7 @@ all 9981 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 | 2026-11-04 | cl | Leipzig v Man City | 23% / 19% / 58% | Man City 58% (43%–74%) | Man City by 1 | 1–2 | Erling Haaland 29% |
 | 2026-11-04 | cl | Slavia v Arsenal | 7% / 13% / 80% | Arsenal 80% (66%–92%) ★ | Arsenal by 3+ | 0–2 | Bukayo Saka 30% |
 | 2026-11-04 | cl | Viking v Sabah | 74% / 12% / 14% | Viking 74% (50%–93%) ★ | Viking by 3+ | 3–1 | Peter Christiansen 46% |
+| 2026-11-04 | el | Stade Rennais v Olympiakos SFP | 40% / 25% / 35% | Stade Rennais 40% (26%–55%) | Draw | 1–1 | Boulaye Dia 19% |
 | 2026-11-05 | el | Milan v Ferencváros | 61% / 20% / 19% | Milan 61% (45%–77%) | Milan by 1 | 1–0 | Alphadjo Cisse 33% |
 | 2026-11-05 | el | Sparta Praha v Bournemouth | 19% / 21% / 60% | Bournemouth 60% (43%–77%) | Bournemouth by 1 | 0–1 | Justin Kluivert 30% |
 | 2026-11-05 | el | AZ v Juventus | 29% / 25% / 47% | Juventus 47% (34%–62%) | Draw | 0–1 | Nick Woltemade 29% |
@@ -97,7 +98,6 @@ all 9981 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 | 2026-11-05 | el | RSC Anderlecht v Red Bull | 63% / 19% / 18% | RSC Anderlecht 63% (47%–79%) ★ | RSC Anderlecht by 1 | 1–0 | Mihajlo Cvetković 41% |
 | 2026-11-05 | el | Sturm Graz v Celje | 71% / 16% / 13% | Sturm Graz 71% (55%–86%) ★ | Sturm Graz by 3+ | 2–0 | Oumar Diakité 25% |
 | 2026-11-05 | el | Sport Lisboa v Lech Poznań | 83% / 10% / 7% | Sport Lisboa 83% (70%–94%) ★ | Sport Lisboa by 3+ | 3–0 | Jhon Durán 46% |
-| 2026-11-05 | el | Stade Rennais v Olympiakos SFP | 40% / 25% / 35% | Stade Rennais 40% (26%–55%) | Draw | 1–1 | Boulaye Dia 19% |
 | 2026-11-05 | el | Sunderland v Dinamo Zagreb | 66% / 19% / 15% | Sunderland 66% (49%–82%) ★ | Sunderland by 1 | 1–0 | Dion Beljo 26% |
 | 2026-11-05 | ecl | Aarhus v Sporting Clube | 27% / 23% / 50% | Sporting Clube 50% (30%–72%) | Draw | 0–1 | Ricardo Horta 30% |
 | 2026-11-05 | ecl | Monaco v Nordsjælland | 51% / 22% / 27% | Monaco 51% (32%–72%) | Monaco by 1 | 1–1 | Paris Brunner 35% |
@@ -221,6 +221,7 @@ all 9981 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 | Leipzig v Man City | 37% / 3% / 60% | Man City: 29% | 44% / 16% | 15% | A/A 38%, D/A 16% | 11% | 40% 43% 44% 45% 49% 53% |
 | Slavia v Arsenal | 17% / 5% / 78% | Arsenal: 45% | 19% / 3% | 6% | A/A 57%, D/A 22% | 8% | 36% 39% 39% 40% 44% 48% |
 | Viking v Sabah | 70% / 1% / 29% | Viking: 47% | 36% / 12% | 13% | H/H 54%, D/H 15% | 9% | 50% 53% 54% 55% 60% 64% |
+| Stade Rennais v Olympiakos SFP | 49% / 8% / 43% | Stade Rennais: 12% | 50% / 20% | 16% | H/H 23%, A/A 19% | 11% | 30% 32% 33% 34% 38% 41% |
 | Milan v Ferencváros | 63% / 5% / 32% | Milan: 27% | 38% / 11% | 14% | H/H 38%, D/H 19% | 11% | 36% 39% 39% 40% 44% 48% |
 | Sparta Praha v Bournemouth | 32% / 6% / 62% | Bournemouth: 26% | 37% / 11% | 12% | A/A 38%, D/A 19% | 11% | 33% 37% 37% 38% 42% 46% |
 | AZ v Juventus | 39% / 8% / 53% | Juventus: 16% | 44% / 16% | 14% | A/A 28%, D/A 16% | 11% | 31% 33% 33% 34% 38% 42% |
@@ -236,7 +237,6 @@ all 9981 matches log loss 0.980, accuracy 53%; Champions League 453 matches log 
 | RSC Anderlecht v Red Bull | 65% / 5% / 31% | RSC Anderlecht: 29% | 36% / 10% | 13% | H/H 40%, D/H 19% | 11% | 36% 39% 39% 40% 44% 48% |
 | Sturm Graz v Celje | 69% / 4% / 27% | Sturm Graz: 37% | 31% / 8% | 11% | H/H 47%, D/H 19% | 10% | 38% 41% 42% 42% 47% 51% |
 | Sport Lisboa v Lech Poznań | 78% / 2% / 21% | Sport Lisboa: 54% | 24% / 6% | 8% | H/H 62%, D/H 17% | 8% | 45% 49% 49% 50% 55% 59% |
-| Stade Rennais v Olympiakos SFP | 49% / 8% / 43% | Stade Rennais: 12% | 50% / 20% | 16% | H/H 23%, A/A 19% | 11% | 30% 32% 33% 34% 38% 41% |
 | Sunderland v Dinamo Zagreb | 67% / 6% / 27% | Sunderland: 28% | 31% / 7% | 11% | H/H 42%, D/H 20% | 10% | 33% 36% 37% 37% 41% 45% |
 | Aarhus v Sporting Clube | 38% / 7% / 55% | Sporting Clube: 19% | 44% / 16% | 14% | A/A 31%, D/A 17% | 11% | 32% 36% 36% 37% 41% 44% |
 | Monaco v Nordsjælland | 57% / 5% / 38% | Monaco: 19% | 45% / 16% | 15% | H/H 31%, D/H 17% | 11% | 34% 37% 38% 39% 43% 47% |
