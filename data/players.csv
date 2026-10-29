@@ -647,8 +647,10 @@ uefa-250221225,Reinaldo,levski-sofia,FW,0.504,82,false
 uefa-250209642,Guilherme Smith,royale-union-saint-gilloise,FW,0.451,81,false
 uefa-250172533,Mihajlo Cvetković,rsc-anderlecht,FW,0.509,80,false
 uefa-250157136,Bamidele Yusuf,ferencvaros,FW,0.404,75,false
+uefa-250116910,Michael Murillo,besiktas,DF,0.251,69,false
 uefa-250177921,Mika Baur,celtic-fc,MF,0.372,67,false
 uefa-250055110,Patrik Schick,bayer-04-leverkusen,FW,0.372,64,true
+uefa-250181426,Hyeongyu Oh,besiktas,FW,0.537,56,false
 uefa-250087443,Justin Kluivert,afc-bournemouth,AM,0.309,55,true
 uefa-250127293,Luka Sučić,real-sociedad-de-futbol,MF,0.404,52,false
 uefa-250188372,Jhon Durán,sport-lisboa-e-benfica,FW,0.37,49,true
@@ -691,7 +693,6 @@ uefa-250080241,Blaž Kramer,celje,FW,0.379,70,false
 uefa-250175059,Noah Sadiki,sunderland-afc,MF,0.21,69,false
 uefa-250145251,Evanilson,afc-bournemouth,FW,0.381,69,false
 uefa-250192808,Clement Bischoff,nec,FW,0.318,69,false
-uefa-250116910,Michael Murillo,besiktas,DF,0.133,69,false
 uefa-250153490,Valdemar Byskov,az,MF,0.209,67,false
 uefa-250085543,Wilfred Ndidi,besiktas,MF,0.213,66,false
 uefa-250132313,Daichi Kamada,crystal-palace-fc,AM,0.196,64,false
@@ -713,6 +714,7 @@ uefa-250103755,Jørgen Strand Larsen,crystal-palace-fc,FW,0.227,53,true
 uefa-250114001,Adam Hložek,tsg-1899-hoffenheim,FW,0.416,53,false
 uefa-250047100,Roman Yaremchuk,pae-olympiakos-sfp,FW,0.37,52,false
 uefa-250163236,Enzo Le Fée,sunderland-afc,MF,0.057,50,true
+uefa-250174798,Koki Machida,tsg-1899-hoffenheim,DF,0.198,50,false
 uefa-250187143,Adam Daghim,tsg-1899-hoffenheim,FW,0.429,48,false
 uefa-250190354,Christophe Kabongo,viktoria-plzen,FW,0.413,47,false
 uefa-250181052,Kerim Alajbegović,juventus-fc,MF,0.301,45,false
@@ -725,6 +727,7 @@ uefa-250040956,Muamer Tankovic,omonia,AM,0.358,44,false
 uefa-250129415,Beñat Turrientes,real-sociedad-de-futbol,MF,0.244,42,false
 uefa-250129690,Orri Óskarsson,real-sociedad-de-futbol,FW,0.447,41,false
 uefa-250116654,Gonçalo Ramos,ac-milan,FW,0.525,40,false
+uefa-250129511,Fisnik Asllani,tsg-1899-hoffenheim,FW,0.451,40,false
 uefa-250135725,Denis Višinský,viktoria-plzen,MF,0.232,39,false
 uefa-250110724,Jesper Lindstrøm,fc-red-bull-salzburg,MF,0.249,39,false
 uefa-250137525,Nicolás González,juventus-fc,FW,0.32,39,false
@@ -997,7 +1000,6 @@ uefa-250060881,Radosław Murawski,lech-poznan,MF,0.054,56,false
 uefa-250177886,Igor Paixão,olympique-de-marseille,FW,0.401,56,false
 uefa-250153814,Anan Khalaili,crystal-palace-fc,DF,0.166,56,false
 uefa-250211106,Belmin Beganović,sk-sturm-graz,FW,0.216,56,false
-uefa-250181426,Hyeongyu Oh,besiktas,FW,0.318,56,false
 uefa-250150469,Omari Hutchinson,ac-milan,MF,0.036,56,false
 uefa-250163025,Matteo Perez Vinlöf,gnk-dinamo-zagreb,DF,0.016,55,false
 uefa-250087436,Mees de Wit,az,DF,0.059,55,false
@@ -1019,7 +1021,6 @@ uefa-250081693,Salih Özcan,besiktas,AM,0.14,51,false
 uefa-250204901,Ayoub Oufkir,az,FW,0.231,50,false
 uefa-250215642,Hugo Burcio,rc-celta-de-vigo,MF,0.056,50,false
 uefa-250130510,Lloyd Kelly,juventus-fc,DF,0.062,50,false
-uefa-250174798,Koki Machida,tsg-1899-hoffenheim,DF,0.021,50,false
 uefa-250135716,Matěj Jurásek,ac-sparta-praha,MF,0.057,50,false
 uefa-250204783,Dayann Methalie,sunderland-afc,DF,0.021,50,false
 uefa-250201673,Edmund Baidoo,fc-red-bull-salzburg,FW,0.215,50,false
@@ -1067,7 +1068,6 @@ uefa-250121218,Jhon Lucumi,juventus-fc,DF,0.011,41,false
 uefa-250114170,Alexander Prass,tsg-1899-hoffenheim,MF,0.06,40,false
 uefa-250081952,Callum O'Dowda,ferencvaros,MF,0.04,40,false
 uefa-250128391,Jarell Quansah,bayer-04-leverkusen,DF,0.011,40,false
-uefa-250129511,Fisnik Asllani,tsg-1899-hoffenheim,FW,0.263,40,false
 uefa-250196745,Gašper Trdin,levski-sofia,MF,0.06,39,false
 uefa-250090713,Amine Harit,olympique-de-marseille,MF,0.06,39,false
 uefa-250068917,Lewis Cook,afc-bournemouth,MF,0.06,39,false
