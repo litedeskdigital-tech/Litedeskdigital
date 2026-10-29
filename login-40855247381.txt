@@ -1,0 +1,4 @@
+Open https://expo.dev/oauth/device?user_code=NKHZ-FNHN
+Code: NKHZ-FNHN
+Ask the user to approve the login in their browser and send you any number shown.
+Then run eas login --device --non-interactive --resume f6a60e39-f4c8-4867-818a-9343994066ee, adding --match NUMBER_FROM_USER if they saw a number.
