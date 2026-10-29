@@ -2,11 +2,17 @@ name: Android APK (EAS)
 
 # Builds the standalone Android APK of mobile/ on Expo EAS: logs in with the EXPO_TOKEN secret if set, else with
 # Expo device login (approve the link in the log, then put the number Expo shows in match-<run id>.txt on the
-# expo-login branch), links the project to that account (once; the projectId is committed back), runs the Android export gate, builds the preview
-# profile (internal APK), waits for FINISHED, downloads the artifact, checks it is a real APK (ZIP magic "PK")
+# expo-login branch), links the project to that account (once; the projectId is committed back), runs the Android export gate, builds the chosen
+# profile (preview or development; internal APK), waits for FINISHED, downloads the artifact, checks it is a real APK (ZIP magic "PK")
 # and attaches it to the run and to a GitHub release.
 on:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "eas.json build profile: preview (standalone app) or development (dev client for npx expo start)"
+        type: choice
+        options: [preview, development]
+        default: preview
 
 permissions:
   contents: write
@@ -65,8 +71,8 @@ jobs:
         id: build
         run: |
           [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
-          npx -y eas-cli@latest build --platform android --profile preview --non-interactive --no-wait --json \
-            --message "UCL Match Model standalone APK" > "$RUNNER_TEMP/build.json"
+          npx -y eas-cli@latest build --platform android --profile "${{ inputs.profile || 'preview' }}" --non-interactive --no-wait --json \
+            --message "UCL Match Model ${{ inputs.profile || 'preview' }} APK" > "$RUNNER_TEMP/build.json"
           cat "$RUNNER_TEMP/build.json"
           BUILD_ID=$(node -p "const b=require(process.env.RUNNER_TEMP+'/build.json'); (Array.isArray(b)?b[0]:b).id")
           echo "id=$BUILD_ID" >> "$GITHUB_OUTPUT"
@@ -104,6 +110,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="android-v$(node -p "require('./app.json').expo.version")-${{ github.run_number }}"
+          SUFFIX=$([ "${{ inputs.profile }}" = "development" ] && echo "-dev" || true)
+          TAG="android-v$(node -p "require('./app.json').expo.version")${SUFFIX}-${{ github.run_number }}"
           gh release create "$TAG" ucl-match-model.apk --target "${{ github.sha }}" --title "UCL Match Model Android ($TAG)" \
             --notes "EAS build ${{ steps.build.outputs.id }}. Expo artifact: ${{ steps.wait.outputs.url }}"

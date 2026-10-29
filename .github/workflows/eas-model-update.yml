@@ -1,0 +1,43 @@
+name: Run model update on EAS
+
+# Starts mobile/.eas/workflows/model-update.yml on Expo's workers from this checkout (eas workflow:run uploads the
+# project, so it works before the repo is linked on expo.dev), after checking which EAS environment variables the
+# production environment has. Expo login as in the APK workflow (EXPO_TOKEN, else device login).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_NO_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Expo login (token, else device login)
+        uses: ./.github/actions/expo-login
+        with:
+          github-token: ${{ github.token }}
+      - name: Check EAS secrets
+        run: |
+          [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
+          # Names only: secret values are not listed.
+          npx -y eas-cli@latest env:list --environment production 2>&1 | grep -E '^[A-Z_]+|Name' > "$RUNNER_TEMP/env.txt" || true
+          cat "$RUNNER_TEMP/env.txt"
+          for name in GH_PUSH_TOKEN SPORTRADAR_API_KEY SPORTRADAR_ODDS_KEY; do
+            if grep -q "$name" "$RUNNER_TEMP/env.txt"; then echo "OK      $name"; else echo "MISSING $name"; fi
+          done
+      - name: Run the EAS workflow
+        run: |
+          [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
+          npx -y eas-cli@latest workflow:run .eas/workflows/model-update.yml --non-interactive --wait 2>&1 | tee "$RUNNER_TEMP/run.txt"
