@@ -1,7 +1,8 @@
 name: Android app update (EAS Update)
 
-# Publishes the current mobile/ JavaScript as an over-the-air update to the "preview" channel, which the installed
-# APK (1.1.0 and later) downloads in the background and applies on restart. Only APKs with the same runtime
+# Publishes the current mobile/ JavaScript as an over-the-air update. Channel "preview": the installed app (1.1.0
+# and later) downloads it in the background and applies it on restart. Channel "development": it appears in the
+# Dev app's Updates tab (UCL Match Model (Dev), signed in as the project owner) and opens from there. Only APKs with the same runtime
 # version (the app version in mobile/app.json) receive it: a change to native modules or app.json needs a new
 # APK instead (Android APK workflow, with the version bumped). Login as in the APK workflow.
 on:
@@ -11,6 +12,11 @@ on:
         description: "What changed (shown on the EAS Update page)"
         type: string
         default: "App update"
+      channel:
+        description: "preview (installed app) or development (Dev app's Updates tab)"
+        type: choice
+        options: [preview, development]
+        default: preview
 
 permissions:
   contents: write
@@ -46,9 +52,12 @@ jobs:
       - name: Publish update
         env:
           MESSAGE: ${{ inputs.message }}
+          CHANNEL: ${{ inputs.channel || 'preview' }}
+          # The Dev app's config (its own app id and name, app.config.js).
+          APP_VARIANT: ${{ inputs.channel == 'development' && 'development' || '' }}
         run: |
           [ -n "$EXPO_TOKEN" ] || unset EXPO_TOKEN
-          npx -y eas-cli@latest update --channel preview --environment preview --platform android \
+          npx -y eas-cli@latest update --channel "$CHANNEL" --environment "$CHANNEL" --platform android \
             --message "$MESSAGE" --non-interactive --json > "$RUNNER_TEMP/update.json"
           cat "$RUNNER_TEMP/update.json"
           GROUP=$(node -p "const u=require(process.env.RUNNER_TEMP+'/update.json'); (Array.isArray(u)?u[0]:u).group")
