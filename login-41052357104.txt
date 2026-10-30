@@ -1,0 +1,4 @@
+Open https://expo.dev/oauth/device?user_code=ZZNR-XMRW
+Code: ZZNR-XMRW
+Ask the user to approve the login in their browser and send you any number shown.
+Then run eas login --device --non-interactive --resume eba60f20-51ff-42fd-9a50-1163a379aff8, adding --match NUMBER_FROM_USER if they saw a number.
