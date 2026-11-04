@@ -831,5 +831,12 @@
   "reason": "calibration within bounds",
   "paramsVersion": 3,
   "driftZ": 0.7563684564172555
+ },
+ {
+  "at": "2026-11-04",
+  "kind": "drift-check",
+  "reason": "calibration within bounds",
+  "paramsVersion": 3,
+  "driftZ": 0.7563684564172555
  }
 ]
