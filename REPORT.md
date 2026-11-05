@@ -2,7 +2,7 @@
 
 Generated 2026-11-05. Ratings include results up to 2026-11-04. Parameter set v3 (tuned 2026-10-21).
 
-Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1893 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
+Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1897 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
 ## Live record (predictions frozen before kick-off)
 
@@ -73,7 +73,7 @@ all 10000 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-05 | el | H. Beer-Sheva v OFI Heraklion | 43% / 25% / 32% | H. Beer-Sheva 43% (24%–63%) | Draw | 1–0 | Taxiarchis Fountas 16% |
 | 2026-11-05 | el | Levski Sofia v Jagiellonia | 39% / 30% / 32% | Levski Sofia 39% (23%–57%) | Draw | 1–0 | Reinaldo 24% |
 | 2026-11-05 | el | Lillestrøm v Viktoria Plzeň | 32% / 27% / 41% | Viktoria Plzeň 41% (21%–67%) | Draw | 0–1 | Thomas Olsen 19% |
-| 2026-11-05 | el | NEC v Omonia | 44% / 24% / 33% | NEC 44% (28%–61%) | Draw | 1–1 | Tjaronn Chery 35% |
+| 2026-11-05 | el | NEC v Omonia | 44% / 24% / 33% | NEC 44% (28%–61%) | Draw | 1–1 | Tjaronn Chery 28% |
 | 2026-11-05 | el | Celta de v Royale Union | 35% / 25% / 40% | Royale Union 40% (27%–55%) | Draw | 1–1 | Guilherme Smith 23% |
 | 2026-11-05 | el | Real Sociedad v Olympique Lyonnais | 46% / 22% / 32% | Real Sociedad 46% (32%–60%) | Draw | 1–1 | Sergio Gómez 29% |
 | 2026-11-05 | el | RSC Anderlecht v Red Bull | 63% / 19% / 18% | RSC Anderlecht 63% (47%–79%) ★ | RSC Anderlecht by 1 | 1–0 | Mihajlo Cvetković 41% |
@@ -156,7 +156,7 @@ all 10000 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-08 | it.1 | Napoli v SS Lazio | 44% / 26% / 30% | Napoli 44% (32%–56%) | Draw | 1–0 | Scott McTominay 21% |
 | 2026-11-08 | nl.1 | AZ v Groningen | 60% / 20% / 21% | AZ 60% (46%–72%) | AZ by 1 | 2–1 | Mexx Meerdink 32% |
 | 2026-11-08 | nl.1 | Twente '65 v Ajax | 43% / 22% / 35% | Twente '65 43% (31%–56%) | Draw | 1–1 | Wout Weghorst 36% |
-| 2026-11-08 | nl.1 | Utrecht v NEC | 43% / 21% / 36% | Utrecht 43% (30%–57%) | Draw | 1–1 | Tjaronn Chery 37% |
+| 2026-11-08 | nl.1 | Utrecht v NEC | 43% / 21% / 36% | Utrecht 43% (30%–57%) | Draw | 1–1 | Tjaronn Chery 30% |
 | 2026-11-08 | nl.1 | Cambuur-Leeuwarden v PSV | 5% / 7% / 88% | PSV 88% (73%–98%) ★ | PSV by 3+ | 0–4 | Ivan Perišić 39% |
 | 2026-11-08 | nl.1 | Heerenveen v Feyenoord | 26% / 20% / 54% | Feyenoord 54% (41%–68%) | Feyenoord by 1 | 1–2 | Anis Hadj Moussa 23% |
 | 2026-11-08 | pt.1 | Santa Clara v Gil Vicente | 41% / 30% / 29% | Santa Clara 41% (30%–53%) | Draw | 1–0 | – |
