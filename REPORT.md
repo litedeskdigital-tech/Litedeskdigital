@@ -1,8 +1,8 @@
 # Model report
 
-Generated 2026-11-05. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
+Generated 2026-11-06. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
 
-Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1944 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
+Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1953 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
 ## Live record (predictions frozen before kick-off)
 
@@ -96,14 +96,14 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-07 | pt.1 | Nacional v Académico de | 40% / 25% / 35% | Nacional 40% (22%–59%) | Draw | 1–1 | – |
 | 2026-11-07 | pt.1 | Alverca v Casa Pia | 46% / 25% / 29% | Alverca 46% (32%–60%) | Draw | 1–0 | – |
 | 2026-11-07 | pt.1 | Sporting v Moreirense | 81% / 12% / 7% | Sporting 81% (72%–90%) ★ | Sporting by 3+ | 2–0 | Luis Suárez 50% |
-| 2026-11-08 | de.1 | Köln v Bayer Leverkusen | 18% / 19% / 63% | Bayer Leverkusen 63% (49%–77%) ★ | Bayer Leverkusen by 1 | 1–2 | Patrik Schick 38% |
+| 2026-11-08 | de.1 | Köln v Bayer Leverkusen | 18% / 19% / 63% | Bayer Leverkusen 63% (49%–77%) ★ | Bayer Leverkusen by 1 | 1–2 | Patrik Schick 39% |
 | 2026-11-08 | de.1 | Freiburg v Union Berlin | 61% / 20% / 19% | Freiburg 61% (48%–74%) ★ | Freiburg by 1 | 2–1 | Vincenzo Grifo 36% |
 | 2026-11-08 | de.1 | Hoffenheim v Schalke | 59% / 20% / 22% | Hoffenheim 59% (37%–79%) | Hoffenheim by 1 | 1–0 | Andrej Kramarić 26% |
 | 2026-11-08 | es.1 | CA Osasuna v Athletic Club | 36% / 26% / 38% | Athletic Club 38% (27%–51%) | Draw | 1–1 | – |
 | 2026-11-08 | es.1 | Atlético v Barça | 36% / 21% / 43% | Barça 43% (30%–57%) | Draw | 1–1 | Julián Alvarez 37% |
 | 2026-11-08 | es.1 | Elche v Betis | 34% / 23% / 43% | Betis 43% (29%–59%) | Draw | 1–1 | Abde Ezzalzouli 24% |
 | 2026-11-08 | es.1 | Málaga v Real Racing | 42% / 23% / 36% | Málaga 42% (18%–67%) | Draw | 1–1 | – |
-| 2026-11-08 | es.1 | Celta de v Levante | 57% / 21% / 22% | Celta de 57% (43%–70%) | Celta de by 1 | 1–1 | Williot Swedberg 23% |
+| 2026-11-08 | es.1 | Celta de v Levante | 57% / 21% / 22% | Celta de 57% (43%–70%) | Celta de by 1 | 1–1 | Pablo Durán 23% |
 | 2026-11-08 | es.1 | Espanyol de v Deportivo La | 48% / 24% / 28% | Espanyol de 48% (29%–69%) | Draw | 1–0 | – |
 | 2026-11-08 | es.1 | Real Sociedad v Rayo Vallecano | 50% / 24% / 26% | Real Sociedad 50% (38%–62%) | Draw | 1–0 | Sergio Gómez 25% |
 | 2026-11-08 | es.1 | Sevilla v Deportivo Alavés | 44% / 25% / 30% | Sevilla 44% (32%–57%) | Draw | 1–0 | – |
@@ -111,7 +111,7 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-08 | es.1 | Villarreal v Getafe | 59% / 22% / 19% | Villarreal 59% (47%–71%) | Villarreal by 1 | 1–0 | Georges Mikautadze 26% |
 | 2026-11-08 | fr.1 | Angers SCO v OGC Nice | 35% / 28% / 37% | OGC Nice 37% (26%–50%) | Draw | 0–1 | – |
 | 2026-11-08 | fr.1 | Le Havre v Lorient | 37% / 25% / 38% | Lorient 38% (26%–53%) | Draw | 1–1 | – |
-| 2026-11-08 | fr.1 | Le Mans v Monaco | 24% / 19% / 58% | Monaco 58% (35%–81%) | Monaco by 1 | 1–2 | Paris Brunner 38% |
+| 2026-11-08 | fr.1 | Le Mans v Monaco | 24% / 19% / 58% | Monaco 58% (35%–81%) | Monaco by 1 | 1–2 | Paris Brunner 37% |
 | 2026-11-08 | fr.1 | Lens v Olympique de | 43% / 23% / 34% | Lens 43% (31%–57%) | Draw | 1–1 | Ruben Aguilar 20% |
 | 2026-11-08 | fr.1 | Stade Brestois v Olympique Lyonnais | 32% / 23% / 46% | Olympique Lyonnais 46% (33%–60%) | Draw | 1–1 | Keito Nakamura 23% |
 | 2026-11-08 | fr.1 | Stade Rennais v Lille | 38% / 25% / 37% | Stade Rennais 38% (27%–50%) | Draw | 1–1 | Boulaye Dia 21% |
@@ -120,7 +120,7 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-08 | it.1 | Inter v Como | 55% / 21% / 24% | Inter 55% (41%–68%) | Inter by 1 | 2–1 | Tasos Douvikas 25% |
 | 2026-11-08 | it.1 | Genoa CFC v Milan | 25% / 25% / 50% | Milan 50% (38%–64%) | Draw | 0–1 | Alphadjo Cisse 29% |
 | 2026-11-08 | it.1 | Napoli v SS Lazio | 44% / 26% / 30% | Napoli 44% (32%–56%) | Draw | 1–0 | Scott McTominay 21% |
-| 2026-11-08 | nl.1 | AZ v Groningen | 59% / 20% / 21% | AZ 59% (46%–72%) | AZ by 1 | 2–1 | Mexx Meerdink 33% |
+| 2026-11-08 | nl.1 | AZ v Groningen | 59% / 20% / 21% | AZ 59% (46%–72%) | AZ by 1 | 2–1 | Mexx Meerdink 39% |
 | 2026-11-08 | nl.1 | Twente '65 v Ajax | 42% / 21% / 37% | Twente '65 42% (29%–55%) | Draw | 1–1 | Wout Weghorst 33% |
 | 2026-11-08 | nl.1 | Utrecht v NEC | 42% / 21% / 37% | Utrecht 42% (29%–56%) | Draw | 1–1 | Bryan Linssen 33% |
 | 2026-11-08 | nl.1 | Cambuur-Leeuwarden v PSV | 5% / 7% / 88% | PSV 88% (73%–98%) ★ | PSV by 3+ | 0–4 | Ivan Perišić 39% |
