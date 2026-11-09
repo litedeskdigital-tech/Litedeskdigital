@@ -1,4 +1,4 @@
-{"updatedAt":"2026-11-08",
+{"updatedAt":"2026-11-09",
 "predictions":[
 {"matchId":"es.1/2026-27/league/levante-ud-v-athletic-club","comp":"es.1","date":"2026-10-21","home":"levante-ud","away":"athletic-club","madeAt":"2026-10-21","paramsVersion":2,"pHome":0.351,"pDraw":0.245,"pAway":0.404,"pHomeCi":[0.231,0.488],"pAwayCi":[0.277,0.551],"pick":{"side":"away","teamId":"athletic-club","pWin":0.404,"isHighProbability":false},"mostLikelyMargin":"Draw","mostLikelyScore":"1–1"},
 {"matchId":"de.1/2026-27/league/vfb-stuttgart-v-borussia-monchengladbach","comp":"de.1","date":"2026-10-23","home":"vfb-stuttgart","away":"borussia-monchengladbach","madeAt":"2026-10-21","paramsVersion":2,"pHome":0.677,"pDraw":0.159,"pAway":0.164,"pHomeCi":[0.54,0.805],"pAwayCi":[0.086,0.268],"pick":{"side":"home","teamId":"vfb-stuttgart","pWin":0.677,"isHighProbability":true},"mostLikelyMargin":"Stuttgart by 3+","mostLikelyScore":"2–1","localTime":"20:30","latest":{"at":"2026-10-23T09:10:15.109Z","paramsVersion":3,"pHome":0.667,"pDraw":0.164,"pAway":0.169,"pick":{"side":"home","teamId":"vfb-stuttgart","pWin":0.667,"isHighProbability":true},"mostLikelyScore":"2–1"}},
