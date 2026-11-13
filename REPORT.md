@@ -1,6 +1,6 @@
 # Model report
 
-Generated 2026-11-12. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
+Generated 2026-11-13. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
 
 Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1953 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
@@ -119,6 +119,8 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-22 | nl.1 | Twente '65 v Willem II | 78% / 14% / 9% | Twente '65 78% (65%–89%) ★ | Twente '65 by 3+ | 2–0 | Wout Weghorst 45% |
 | 2026-11-22 | nl.1 | Go Ahead v Fortuna Sittard | 57% / 20% / 23% | Go Ahead 57% (43%–70%) | Go Ahead by 1 | 2–1 | – |
 | 2026-11-22 | nl.1 | Sparta Rotterdam v AZ | 25% / 22% / 53% | AZ 53% (40%–67%) | AZ by 1 | 1–1 | Mexx Meerdink 36% |
+| 2026-11-23 | it.1 | Monza v ACF Fiorentina | 26% / 23% / 52% | ACF Fiorentina 52% (37%–68%) | ACF Fiorentina by 1 | 0–1 | – |
+| 2026-11-23 | it.1 | Juventus v Venezia | 75% / 17% / 9% | Juventus 75% (62%–86%) ★ | Juventus by 3+ | 2–0 | Nick Woltemade 37% |
 
 
 
