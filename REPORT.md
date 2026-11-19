@@ -1,6 +1,6 @@
 # Model report
 
-Generated 2026-11-18. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
+Generated 2026-11-19. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
 
 Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1953 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
@@ -205,6 +205,39 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-28 | pt.1 | Arouca v Rio Ave | 55% / 22% / 23% | Arouca 55% (42%–69%) | Arouca by 1 | 1–0 | – |
 | 2026-11-28 | pt.1 | Moreirense v Santa Clara | 35% / 29% / 36% | Santa Clara 36% (25%–49%) | Draw | 0–1 | – |
 | 2026-11-28 | pt.1 | Vitória Guimarães v Estrela da | 55% / 23% / 22% | Vitória Guimarães 55% (42%–68%) | Vitória Guimarães by 1 | 1–0 | – |
+| 2026-11-29 | de.1 | Dortmund v Bayer Leverkusen | 46% / 23% / 32% | Dortmund 46% (34%–59%) | Draw | 1–1 | Serhou Guirassy 39% |
+| 2026-11-29 | de.1 | Freiburg v Leipzig | 39% / 22% / 39% | Freiburg 39% (27%–53%) | Draw | 1–1 | Vincenzo Grifo 30% |
+| 2026-11-29 | de.1 | Hoffenheim v Augsburg | 52% / 20% / 28% | Hoffenheim 52% (37%–66%) | Hoffenheim by 1 | 2–1 | Andrej Kramarić 26% |
+| 2026-11-29 | es.1 | Elche v Atlético | 23% / 21% / 56% | Atlético 56% (42%–72%) | Atlético by 1 | 1–2 | Julián Alvarez 42% |
+| 2026-11-29 | es.1 | Levante v Real Racing | 62% / 17% / 21% | Levante 62% (38%–83%) | Levante by 3+ | 2–1 | – |
+| 2026-11-29 | es.1 | Málaga v Athletic Club | 22% / 26% / 53% | Athletic Club 53% (34%–72%) | Draw | 0–1 | – |
+| 2026-11-29 | es.1 | Celta de v Villarreal | 44% / 22% / 34% | Celta de 44% (32%–58%) | Draw | 1–1 | Georges Mikautadze 23% |
+| 2026-11-29 | es.1 | Deportivo La v Barça | 13% / 14% / 72% | Barça 72% (51%–90%) ★ | Barça by 3+ | 1–2 | Anthony Gordon 45% |
+| 2026-11-29 | es.1 | Espanyol de v Getafe | 44% / 29% / 27% | Espanyol de 44% (32%–56%) | Draw | 1–0 | Borja Mayoral 14% |
+| 2026-11-29 | es.1 | Betis v Rayo Vallecano | 54% / 24% / 22% | Betis 54% (42%–66%) | Betis by 1 | 1–0 | Abde Ezzalzouli 24% |
+| 2026-11-29 | es.1 | Real Madrid v Deportivo Alavés | 76% / 14% / 9% | Real Madrid 76% (65%–86%) ★ | Real Madrid by 3+ | 2–0 | Kylian Mbappé 63% |
+| 2026-11-29 | es.1 | Real Sociedad v Sevilla | 53% / 22% / 25% | Real Sociedad 53% (40%–67%) | Real Sociedad by 1 | 1–1 | Sergio Gómez 28% |
+| 2026-11-29 | es.1 | Valencia v CA Osasuna | 45% / 25% / 30% | Valencia 45% (32%–58%) | Draw | 1–0 | – |
+| 2026-11-29 | fr.1 | AJ Auxerre v Olympique de | 31% / 23% / 46% | Olympique de 46% (33%–61%) | Draw | 1–1 | Keyliane Abdallah 21% |
+| 2026-11-29 | fr.1 | Olympique Lyonnais v Monaco | 43% / 22% / 35% | Olympique Lyonnais 43% (31%–56%) | Draw | 1–1 | Paris Brunner 26% |
+| 2026-11-29 | fr.1 | Toulouse v Stade Rennais | 40% / 23% / 37% | Toulouse 40% (28%–54%) | Draw | 1–1 | Boulaye Dia 22% |
+| 2026-11-29 | it.1 | Roma v Monza | 78% / 14% / 8% | Roma 78% (66%–89%) ★ | Roma by 3+ | 2–0 | Donyell Malen 51% |
+| 2026-11-29 | it.1 | Cagliari Calcio v Milan | 26% / 24% / 50% | Milan 50% (38%–64%) | Draw | 0–1 | Alphadjo Cisse 29% |
+| 2026-11-29 | it.1 | Como v Juventus | 40% / 25% / 35% | Como 40% (28%–53%) | Draw | 1–1 | Tasos Douvikas 28% |
+| 2026-11-29 | it.1 | Inter v Genoa CFC | 75% / 15% / 10% | Inter 75% (64%–86%) ★ | Inter by 3+ | 2–0 | Lautaro Martínez 30% |
+| 2026-11-29 | it.1 | Frosinone Calcio v Parma Calcio | 47% / 25% / 28% | Frosinone Calcio 47% (32%–64%) | Draw | 1–0 | – |
+| 2026-11-29 | it.1 | Torino v SS Lazio | 29% / 27% / 45% | SS Lazio 45% (33%–59%) | Draw | 0–1 | – |
+| 2026-11-29 | it.1 | Udinese Calcio v ACF Fiorentina | 38% / 25% / 38% | Udinese Calcio 38% (26%–51%) | Draw | 1–1 | – |
+| 2026-11-29 | it.1 | US Lecce v Atalanta BC | 17% / 24% / 59% | Atalanta BC 59% (48%–72%) | Atalanta BC by 1 | 0–1 | Gianluca Scamacca 26% |
+| 2026-11-29 | it.1 | US Sassuolo v Napoli | 27% / 23% / 51% | Napoli 51% (37%–65%) | Napoli by 1 | 1–1 | Scott McTominay 26% |
+| 2026-11-29 | it.1 | Venezia v Bologna | 21% / 25% / 55% | Bologna 55% (40%–71%) | Bologna by 1 | 0–1 | – |
+| 2026-11-29 | nl.1 | ADO Den v Utrecht | 22% / 19% / 59% | Utrecht 59% (38%–80%) | Utrecht by 1 | 1–2 | – |
+| 2026-11-29 | nl.1 | Feyenoord v Ajax | 50% / 20% / 30% | Feyenoord 50% (37%–64%) | Feyenoord by 1 | 2–1 | Tolu Arokodare 30% |
+| 2026-11-29 | nl.1 | Fortuna Sittard v Heerenveen | 37% / 23% / 41% | Heerenveen 41% (28%–56%) | Draw | 1–1 | – |
+| 2026-11-29 | nl.1 | NEC v Twente '65 | 40% / 21% / 39% | NEC 40% (27%–53%) | Draw | 1–1 | Bryan Linssen 33% |
+| 2026-11-29 | nl.1 | PEC Zwolle v AZ | 21% / 19% / 60% | AZ 60% (47%–74%) | AZ by 1 | 1–2 | Mexx Meerdink 40% |
+| 2026-11-29 | pt.1 | Porto v Sporting | 39% / 26% / 36% | Porto 39% (28%–51%) | Draw | 1–1 | Luis Suárez 27% |
+| 2026-11-29 | pt.1 | Gil Vicente v GD Estoril | 46% / 24% / 30% | Gil Vicente 46% (33%–59%) | Draw | 1–1 | – |
 
 ### UEFA club-competition scenarios (5,000 minute-by-minute simulations each)
 
