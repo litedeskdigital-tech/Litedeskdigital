@@ -2,7 +2,7 @@
 
 Generated 2026-11-19. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
 
-Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1953 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
+Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1950 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
 ## Live record (predictions frozen before kick-off)
 
@@ -108,7 +108,7 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-26 | ecl | Hajduk Split v Sint-Truidense VV | 42% / 25% / 33% | Hajduk Split 42% (24%–62%) | Draw | 1–1 | Dalisson 23% |
 | 2026-11-26 | ecl | Heart of v Monaco | 17% / 19% / 64% | Monaco 64% (48%–81%) ★ | Monaco by 1 | 0–2 | Paris Brunner 35% |
 | 2026-11-26 | ecl | Iberia Tbilisi v Getafe | 10% / 21% / 69% | Getafe 69% (52%–85%) ★ | Getafe by 1 | 0–1 | Borja Mayoral 28% |
-| 2026-11-26 | ecl | Inter Escaldes v Copenhagen | 12% / 14% / 74% | Copenhagen 74% (53%–92%) ★ | Copenhagen by 3+ | 0–2 | Mohamed Elyounoussi 37% |
+| 2026-11-26 | ecl | Inter Escaldes v Copenhagen | 12% / 14% / 74% | Copenhagen 74% (53%–92%) ★ | Copenhagen by 3+ | 0–2 | Maher Carrizo 40% |
 | 2026-11-26 | ecl | Jablonec v Lugano | 54% / 22% / 24% | Jablonec 54% (33%–76%) | Jablonec by 1 | 1–0 | Antonín Růsek 32% |
 | 2026-11-26 | ecl | KAA Gent v Crvena Zvezda | 46% / 24% / 31% | KAA Gent 46% (29%–63%) | Draw | 1–1 | Hyllarion Goore 24% |
 | 2026-11-26 | ecl | Kairat Almaty v Mjällby | 39% / 31% / 30% | Kairat Almaty 39% (21%–61%) | Draw | 0–0 | Marc Gual 30% |
@@ -116,7 +116,7 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-26 | ecl | Nordsjælland v Panathinaikos | 59% / 22% / 20% | Nordsjælland 59% (40%–77%) | Nordsjælland by 1 | 1–0 | Ibrahim Adel 34% |
 | 2026-11-26 | ecl | Pafos v Midtjylland | 34% / 25% / 42% | Midtjylland 42% (25%–62%) | Draw | 1–1 | Lelê 20% |
 | 2026-11-26 | ecl | Freiburg v Twente '65 | 57% / 22% / 22% | Freiburg 57% (43%–70%) | Freiburg by 1 | 1–0 | Vincenzo Grifo 32% |
-| 2026-11-26 | ecl | Sporting Clube v KuPS Kuopio | 80% / 14% / 6% | Sporting Clube 80% (67%–91%) ★ | Sporting Clube by 3+ | 2–0 | Ricardo Horta 37% |
+| 2026-11-26 | ecl | Sporting Clube v KuPS Kuopio | 80% / 14% / 6% | Sporting Clube 80% (67%–91%) ★ | Sporting Clube by 3+ | 2–0 | Ricardo Horta 38% |
 | 2026-11-20 | de.1 | Bayern v Köln | 91% / 6% / 3% | Bayern 91% (84%–97%) ★ | Bayern by 3+ | 4–0 | Harry Kane 70% |
 | 2026-11-20 | fr.1 | ES Troyes v Le Havre | 31% / 24% / 44% | Le Havre 44% (24%–68%) | Draw | 0–1 | – |
 | 2026-11-21 | de.1 | Union Berlin v Leipzig | 25% / 21% / 54% | Leipzig 54% (41%–69%) | Leipzig by 1 | 1–1 | Brajan Gruda 22% |
