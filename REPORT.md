@@ -1,6 +1,6 @@
 # Model report
 
-Generated 2026-11-23. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
+Generated 2026-11-24. Ratings include results up to 2026-11-05. Parameter set v3 (tuned 2026-10-21).
 
 Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 1950 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
@@ -117,8 +117,6 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-11-26 | ecl | Pafos v Midtjylland | 34% / 25% / 42% | Midtjylland 42% (25%–62%) | Draw | 1–1 | Lelê 20% |
 | 2026-11-26 | ecl | Freiburg v Twente '65 | 57% / 22% / 22% | Freiburg 57% (43%–70%) | Freiburg by 1 | 1–0 | Vincenzo Grifo 32% |
 | 2026-11-26 | ecl | Sporting Clube v KuPS Kuopio | 80% / 14% / 6% | Sporting Clube 80% (67%–91%) ★ | Sporting Clube by 3+ | 2–0 | Ricardo Horta 38% |
-| 2026-11-23 | it.1 | Monza v ACF Fiorentina | 26% / 23% / 52% | ACF Fiorentina 52% (37%–68%) | ACF Fiorentina by 1 | 0–1 | – |
-| 2026-11-23 | it.1 | Juventus v Venezia | 74% / 17% / 9% | Juventus 74% (61%–85%) ★ | Juventus by 3+ | 2–0 | Nick Woltemade 36% |
 | 2026-11-27 | de.1 | Werder Bremen v Borussia Mönchengladbach | 47% / 22% / 32% | Werder Bremen 47% (33%–61%) | Draw | 1–1 | – |
 | 2026-11-27 | fr.1 | Stade Brestois v Paris | 41% / 24% / 35% | Stade Brestois 41% (27%–56%) | Draw | 1–1 | – |
 | 2026-11-27 | nl.1 | Groningen v Willem II | 65% / 19% / 16% | Groningen 65% (50%–80%) ★ | Groningen by 1 | 1–0 | – |
@@ -195,6 +193,7 @@ all 10034 matches log loss 0.980, accuracy 53%; Champions League 471 matches log
 | 2026-12-02 | en.1 | Man City v Leeds United | 65% / 19% / 16% | Man City 65% (52%–78%) ★ | Man City by 1 | 2–0 | Erling Haaland 44% |
 | 2026-12-02 | en.1 | Newcastle United v Man Utd | 46% / 22% / 32% | Newcastle United 46% (33%–60%) | Draw | 1–1 | Matheus Cunha 26% |
 | 2026-12-02 | en.1 | Tottenham Hotspur v Fulham | 43% / 24% / 32% | Tottenham Hotspur 43% (31%–56%) | Draw | 1–1 | – |
+| 2026-12-04 | nl.1 | Telstar v Groningen | 38% / 24% / 38% | Groningen 38% (25%–54%) | Draw | 1–1 | – |
 
 ### UEFA club-competition scenarios (5,000 minute-by-minute simulations each)
 
