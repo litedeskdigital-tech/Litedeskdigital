@@ -1,6 +1,6 @@
 # Model report
 
-Generated 2026-11-27. Ratings include results up to 2026-11-26. Parameter set v3 (tuned 2026-10-21).
+Generated 2026-11-28. Ratings include results up to 2026-11-26. Parameter set v3 (tuned 2026-10-21).
 
 Sources: openfootball cl 2023-24, openfootball cl 2024-25, openfootball cl 2025-26, openfootball en.1 2023-24, openfootball es.1 2023-24, openfootball de.1 2023-24, openfootball it.1 2023-24, openfootball fr.1 2023-24, openfootball pt.1 2023-24, openfootball nl.1 2023-24, openfootball at.1 2023-24, openfootball en.1 2024-25, openfootball es.1 2024-25, openfootball de.1 2024-25, openfootball it.1 2024-25, openfootball fr.1 2024-25, openfootball pt.1 2024-25, openfootball nl.1 2024-25, openfootball at.1 2024-25, openfootball be.1 2024-25, openfootball tr.1 2024-25, openfootball sco.1 2024-25, openfootball gr.1 2024-25, openfootball en.1 2025-26, openfootball es.1 2025-26, openfootball de.1 2025-26, openfootball it.1 2025-26, openfootball fr.1 2025-26, openfootball pt.1 2025-26, openfootball nl.1 2025-26, openfootball at.1 2025-26, openfootball be.1 2025-26, openfootball tr.1 2025-26, openfootball sco.1 2025-26, openfootball gr.1 2025-26, openfootball en.1 2026-27, openfootball es.1 2026-27, openfootball de.1 2026-27, openfootball it.1 2026-27, openfootball fr.1 2026-27, openfootball pt.1 2026-27, openfootball nl.1 2026-27, 30 provisional hand-entered CL rows, UEFA matches: 816 rows, 1 clubs skipped (see data/uefa-import.json), UEFA player stats 2026-27: 2044 players from 107 clubs, 1 clubs unmapped (see data/uefa-teams.json).
 
@@ -64,10 +64,15 @@ all 10087 matches log loss 0.980, accuracy 53%; Champions League 489 matches log
 
 | Date | Comp | Match | H / D / A | Pick | Margin | Score | Bonus scorer |
 |---|---|---|---|---|---|---|---|
-| 2026-11-27 | de.1 | Werder Bremen v Borussia Mönchengladbach | 47% / 22% / 32% | Werder Bremen 47% (33%–61%) | Draw | 1–1 | – |
-| 2026-11-27 | fr.1 | Stade Brestois v Paris | 41% / 24% / 35% | Stade Brestois 41% (27%–56%) | Draw | 1–1 | – |
-| 2026-11-27 | nl.1 | Groningen v Willem II | 65% / 19% / 16% | Groningen 65% (50%–80%) ★ | Groningen by 1 | 1–0 | – |
-| 2026-11-27 | pt.1 | CS Marítimo v Nacional | 39% / 25% / 37% | CS Marítimo 39% (21%–59%) | Draw | 1–1 | – |
+| 2026-12-08 | cl | AEK Athen v Galatasaray | 35% / 22% / 43% | Galatasaray 43% (27%–62%) | Draw | 1–1 | Victor Osimhen 27% |
+| 2026-12-08 | cl | Roma v Sporting | 49% / 21% / 31% | Roma 49% (33%–64%) | Draw | 2–1 | Donyell Malen 33% |
+| 2026-12-08 | cl | Villa v PSG | 39% / 21% / 40% | PSG 40% (26%–55%) | Draw | 1–1 | Ousmane Dembélé 27% |
+| 2026-12-08 | cl | Barça v Man City | 51% / 18% / 31% | Barça 51% (34%–67%) | Barça by 1 | 2–1 | Anthony Gordon 38% |
+| 2026-12-08 | cl | Bayern v Slavia | 92% / 5% / 3% | Bayern 92% (83%–98%) ★ | Bayern by 3+ | 4–0 | Harry Kane 59% |
+| 2026-12-08 | cl | Man Utd v Leipzig | 60% / 18% / 22% | Man Utd 60% (45%–75%) | Man Utd by 3+ | 2–1 | Bruno Fernandes 38% |
+| 2026-12-08 | cl | Napoli v Brugge | 44% / 21% / 36% | Napoli 44% (28%–60%) | Draw | 1–1 | Nicolò Tresoldi 35% |
+| 2026-12-08 | cl | Viking v Feyenoord | 50% / 18% / 31% | Viking 50% (30%–73%) | Viking by 1 | 2–1 | Peter Christiansen 26% |
+| 2026-12-08 | cl | Villarreal v Sabah | 81% / 10% / 9% | Villarreal 81% (65%–93%) ★ | Villarreal by 3+ | 3–1 | Tani Oluwaseyi 29% |
 | 2026-11-28 | de.1 | Köln v Elversberg | 40% / 21% / 39% | Köln 40% (19%–63%) | Draw | 1–1 | – |
 | 2026-11-28 | de.1 | FSV Mainz v Union Berlin | 57% / 22% / 21% | FSV Mainz 57% (44%–71%) | FSV Mainz by 1 | 1–0 | – |
 | 2026-11-28 | de.1 | Hamburger v Bayern | 7% / 10% / 83% | Bayern 83% (71%–93%) ★ | Bayern by 3+ | 0–3 | Harry Kane 57% |
@@ -207,7 +212,19 @@ all 10087 matches log loss 0.980, accuracy 53%; Champions League 489 matches log
 | 2026-12-06 | pt.1 | Sporting Clube v Arouca | 63% / 20% / 17% | Sporting Clube 63% (51%–75%) ★ | Sporting Clube by 1 | 1–0 | Pau Víctor 28% |
 | 2026-12-06 | pt.1 | Sporting v CS Marítimo | 88% / 8% / 4% | Sporting 88% (75%–97%) ★ | Sporting by 3+ | 3–0 | Luis Suárez 61% |
 
+### UEFA club-competition scenarios (5,000 minute-by-minute simulations each)
 
+| Match | First goal H / none / A | Favourite wins after conceding first | Favourite trails / trails by 2 | Favourite drops a lead | Likeliest HT/FT | Late winner (level at 75') | Goal in each 15' block |
+|---|---|---|---|---|---|---|---|
+| AEK Athen v Galatasaray | 46% / 4% / 50% | Galatasaray: 18% | 54% / 24% | 18% | A/A 26%, H/H 20% | 11% | 37% 40% 41% 41% 45% 50% |
+| Roma v Sporting | 54% / 3% / 43% | Roma: 20% | 52% / 21% | 18% | H/H 29%, A/A 18% | 12% | 39% 42% 43% 44% 48% 52% |
+| Villa v PSG | 48% / 3% / 49% | PSG: 16% | 58% / 28% | 20% | A/A 24%, H/H 23% | 12% | 39% 42% 43% 43% 48% 52% |
+| Barça v Man City | 55% / 1% / 44% | Barça: 26% | 56% / 27% | 22% | H/H 30%, A/A 19% | 12% | 47% 50% 52% 52% 57% 61% |
+| Bayern v Slavia | 85% / 1% / 14% | Bayern: 69% | 16% / 3% | 4% | H/H 75%, D/H 14% | 5% | 51% 54% 55% 56% 61% 65% |
+| Man Utd v Leipzig | 61% / 3% / 36% | Man Utd: 29% | 44% / 15% | 16% | H/H 38%, D/H 16% | 11% | 41% 44% 45% 45% 50% 54% |
+| Napoli v Brugge | 51% / 3% / 46% | Napoli: 18% | 56% / 25% | 19% | H/H 26%, A/A 21% | 12% | 39% 43% 43% 44% 48% 52% |
+| Viking v Feyenoord | 55% / 2% / 43% | Viking: 26% | 55% / 25% | 20% | H/H 31%, A/A 19% | 12% | 45% 48% 49% 50% 55% 59% |
+| Villarreal v Sabah | 75% / 1% / 24% | Villarreal: 54% | 30% / 8% | 10% | H/H 61%, D/H 15% | 8% | 50% 53% 54% 55% 60% 65% |
 
 ★ = high-probability pick (≥60% and the low end of its range ≥45%).
 
